@@ -22,7 +22,9 @@ class Project(models.Model):
     uid = models.IntegerField("id", read_only=True, default=-1) # The uid field is "id" on SG
     code = models.StringField("name") # The code field is "name" on SG
     status = models.StringField("sg_status_list", default="ip")  # The status field is "sg_status_list" on SG
+```
 
+```python
 # CREATE
 new_project = Project.create(name="Foo", status="Active") # Create and store it in the DB
 # or
