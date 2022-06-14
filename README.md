@@ -5,8 +5,8 @@ vfxDatabaseORM is a package designed to make some CRUD requests to your Asset Ma
 The following exemple demonstrates a use case with `Shotgrid`.
 
 ```python
-from vfxDatabase.src.domain.models import Model, IntegerField, StringField
-from vfxDatabase.src.adapters.shotgunManagerAdapter import ShotgunManagerAdapter
+from vfxDatabaseORM.src.domain import models
+from vfxDatabaseORM.src.adapters.shotgunManagerAdapter import ShotgunManagerAdapter
 
 
 class MyShotgunManager(ShotgunManagerAdapter):
@@ -15,13 +15,13 @@ class MyShotgunManager(ShotgunManagerAdapter):
     SCRIPT_KEY = "script_key"
 
 
-class Project(Model):
+class Project(models.Model):
     manager_class = MyShotgunManager  # Manager for SG
     entity_name = "Project"  # Entity name on SG
 
-    uid = IntegerField("id", read_only=True, default=-1) # The uid field is "id" on SG
-    code = StringField("name") # The code field is "name" on SG
-    status = StringField("sg_status_list", default="ip")  # The status field is "sg_status_list" on SG
+    uid = models.IntegerField("id", read_only=True, default=-1) # The uid field is "id" on SG
+    code = models.StringField("name") # The code field is "name" on SG
+    status = models.StringField("sg_status_list", default="ip")  # The status field is "sg_status_list" on SG
 
 # CREATE
 new_project = Project.create(name="Foo", status="Active") # Create and store it in the DB
@@ -43,3 +43,20 @@ project.save(status="fin")
 # DELETE
 project.delete()
 ```
+
+You can easily integrate another solution like `Ftrack`, `Kitsu` or your own solution by creating the corresponding `Manager`.
+It is designed like the powerful Django ORM.
+
+# Advantages
+- Easily integration with Asset Managers or Homemade database
+
+# TODO
+- Fields by type (IntegerField, StringField...)
+- Validations on fields
+- Add other adapters (Ftrack, Kitsu, DBs)
+- Add serializers to serialize a model instance
+
+# Tests
+
+# Limitations
+- Related Fields are not ready yet.
