@@ -11,14 +11,14 @@ class AttributeDescriptor(object):
         :type field: vfxDatabaseORM.src.domain.models.fields.Field
         """
         self._field = field
-        self._value = field.default
+        self._attribute_name = "_{field_name}".format(field_name=field.name)
 
     def __get__(self, instance, owner):
-        return self._value
+        return getattr(instance, self._attribute_name)
 
     def __set__(self, instance, value):
         if not instance._initialized:
-            self._value = value
+            setattr(instance, self._attribute_name, value)
             return
 
         # We are outside of the __init__ in the instance
@@ -34,7 +34,7 @@ class AttributeDescriptor(object):
         if self._field not in instance._changed:
             instance._changed.append(self._field)
 
-        self._value = value
+        setattr(instance, self._attribute_name, value)
 
 
 # class RelatedAttributeDescriptor(object):
