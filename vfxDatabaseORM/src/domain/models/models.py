@@ -45,7 +45,7 @@ class BaseModel(type):
                 )
             )
 
-        # Create the class
+        # Hard work start here, create the class
         new_attrs = attrs.copy()
 
         options = Options()
@@ -55,14 +55,25 @@ class BaseModel(type):
             if not isinstance(attr_value, (Field, RelatedField)):
                 continue
 
-            field = attr_value
+            # Remove the attribute from new_attrs
+            # A private attribute and a linked descriptor will be created
             new_attrs.pop(attr_name)
+
+            field = attr_value
 
             # Insert the attribute name as the name of the field
             field._name = attr_name
 
             # Collect fields objects
             if isinstance(attr_value, Field):
+                # Create private attribute
+                new_attrs["_{}".format(attr_name)] = field.default
+
+                # Create and set descriptors for basic fields
+                attr_descriptor = AttributeDescriptor(field=field)
+                new_attrs[attr_name] = attr_descriptor
+
+                # Register field in options
                 options.add_field(field)
 
             if isinstance(attr_value, RelatedField):
@@ -108,12 +119,7 @@ class Model(object):
         fields = self.get_fields()
         field_names = [field.name for field in fields]
 
-        # Create and set descriptors for basic fields
-        for field in fields:
-            attr_descriptor = AttributeDescriptor(field=field)
-            setattr(self, field.name, attr_descriptor)
-
-        # Fill descriptors
+        # Fill descriptors for basic fields
         for arg_name, arg_value in kwargs.items():
             if arg_name not in field_names:
                 continue
