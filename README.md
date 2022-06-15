@@ -26,7 +26,7 @@ class Project(models.Model):
 
 ```python
 # CREATE
-new_project = Project.create(name="Foo", status="Active") # Create and store it in the DB
+new_project = Project.objects.create(name="Foo", status="Active") # Create and store it in the DB
 # or
 new_project = Project(name="Foo", status="Active") # Created but not stored in the DB
 new_project.save() # Store it in the DB
