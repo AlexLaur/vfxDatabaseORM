@@ -20,3 +20,7 @@ class InvalidLookUp(Exception):
 
 class ModelNotDefined(Exception):
     pass
+
+
+class ModelNotRegistered(Exception):
+    pass

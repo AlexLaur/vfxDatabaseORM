@@ -15,11 +15,12 @@ class Graph(object):
         self._graph.add_node(node_name)
 
     def get_node_model(self, node_name):
-        # TODO more check needed here
+        if node_name not in self._graph.nodes:
+            raise exceptions.ModelNotRegistered(
+                "The model '{node_name}' cannot be found. "
+                "Have you defined it ?".format(node_name=node_name)
+            )
         return self._graph.nodes(data=True)[node_name].get("model")
-
-    def get_node(self, node_name):
-        return self._graph.nodes.get(node_name, None)
 
     def add_attribute_to_node(self, node_name, attribute_name, attribute_value):
         self._graph.nodes[node_name][attribute_name] = attribute_value
