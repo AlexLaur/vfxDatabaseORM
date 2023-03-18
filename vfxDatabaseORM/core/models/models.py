@@ -18,7 +18,7 @@ class BaseModel(type):
     _graph = None  # Singleton Graph
 
     def __new__(cls, name, bases, attrs, **kwargs):
-        
+
         # Initialize the graph for all futures entities and links
         if not cls._graph:
             cls._graph = Graph()
@@ -76,7 +76,7 @@ class BaseModel(type):
 
                 # Register field in options
                 options.add_field(field)
-            
+
             if isinstance(attr_value, RelatedField):
                 # Register field in options
                 options.add_related_field(field)
@@ -190,5 +190,5 @@ class Model(object):
             if field.name == field_name:
                 return field
         raise exceptions.FieldNotFound(
-            "Field '{name}' isn't setted on the Model.".format(name=field_name)
+            "This Model doesn't have a Field named '{name}'.".format(name=field_name)
         )

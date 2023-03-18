@@ -16,20 +16,25 @@ class AttributeDescriptor(object):
     def __get__(self, instance, owner):
 
         if self._field.related:
-            model_name = instance.__class__.__name__
+
+            related_model = instance._graph.get_node_model(self._field.to)
 
             if self._field.is_one_to_many:
-                return instance._graph.get_node_model(self._field.to).objects.all() # TODO should be filtered by id of the instance
+                return related_model.objects.all() # TODO should be filtered by id of the instance
 
             elif self._field.is_one_to_one:
-                return instance._graph.get_node_model(self._field.to).objects.get(-1) # TODO should be filtered by id of the instance
+                return related_model.objects.get(-1) # TODO should be filtered by id of the instance
 
             elif self._field.is_many_to_many:
-                return instance._graph.get_node_model(self._field.to).objects.all() # TODO what here ?
+                return related_model.objects.all() # TODO what here ?
 
             else:
-                # TODO should never hapen here
-                pass
+                # Should never hapen here
+                raise exceptions.FieldBadType(
+                    "Unknown related field. "
+                    "Only ManyToManyField, OneToOneField and OneToManyField "
+                    "are configured here."
+                )
 
         # It is not a related field, simply return the value.
         return getattr(instance, self._attribute_name)
@@ -52,7 +57,10 @@ class AttributeDescriptor(object):
 
         # Check the value before storing it
         if not self._field.check_value(value):
-            raise exceptions.FieldBadType()
+            raise exceptions.FieldBadValue(
+                "The given value '{value}' is not valid "
+                "for this kind of field '{field}'.".format(value=value, field=self._field)
+            )
 
         # The field has been changed, mark it as changed.
         if self._field not in instance._changed:

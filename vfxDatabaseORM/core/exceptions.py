@@ -10,5 +10,13 @@ class FieldBadType(Exception):
     pass
 
 
+class FieldBadValue(Exception):
+    pass
+
+
 class InvalidLookUp(Exception):
+    pass
+
+
+class ModelNotDefined(Exception):
     pass
