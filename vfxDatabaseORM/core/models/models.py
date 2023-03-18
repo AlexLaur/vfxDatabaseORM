@@ -29,6 +29,15 @@ class BaseModel(type):
         if not parents:
             return super(BaseModel, cls).__new__(cls, name, bases, attrs)
 
+        # Do small checks
+        manager_class = attrs.get("manager_class", None)
+        if not manager_class:
+            raise exceptions.ManagerNotDefined(
+                "No Manager defined. "
+                "Add a manager to the model through the attribute "
+                "'manager_class'."
+            )
+
         # Add the a new node to the graph
         cls._graph.add_node(name)
 

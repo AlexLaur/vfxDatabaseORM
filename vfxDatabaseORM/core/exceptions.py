@@ -24,3 +24,7 @@ class ModelNotDefined(Exception):
 
 class ModelNotRegistered(Exception):
     pass
+
+
+class ManagerNotDefined(Exception):
+    pass
