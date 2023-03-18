@@ -1,6 +1,9 @@
 from .fields import (
     Field,
-    IntegerField
+    IntegerField,
+    OneToOneField,
+    ManyToManyField,
+    OneToManyField,
 )  # noqa
 
 from .models import Model  # noqa

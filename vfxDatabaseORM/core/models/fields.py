@@ -9,6 +9,8 @@ class BaseField(object):
 
     LOOKUP_TOKEN = constants.LOOKUP_TOKEN
 
+    _related = False
+
     def __init__(
         self, db_name, description=None, default=None, read_only=False
     ):
@@ -138,8 +140,29 @@ class Field(BaseField):
         "endswith",
     ]
 
-    RELATED = False
+    _related = False
 
+class RelatedField(BaseField):
+
+    LOOKUPS = [BaseField.EQUAL_LOOKUP]
+
+    is_many_to_many = False
+    is_one_to_many = False
+    is_one_to_one = False
+
+    _related = True
+
+    def __init__(self, db_name, to, *args, **kwargs):
+
+        self._to = to
+
+        super(RelatedField, self).__init__(db_name, *args, **kwargs)
+
+    @property
+    def to(self):
+        return self._to
+
+# ##########################################
 
 class IntegerField(Field):
     """A Field which implements an Integer"""
@@ -155,3 +178,16 @@ class IntegerField(Field):
         if not isinstance(value, int):
             return False
         return super(IntegerField, self).check_value(value)
+
+
+
+class OneToOneField(RelatedField):
+    is_one_to_one = True
+
+
+class ManyToManyField(RelatedField):
+    is_many_to_many = True
+
+
+class OneToManyField(RelatedField):
+    is_one_to_many = True
