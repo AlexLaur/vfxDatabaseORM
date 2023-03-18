@@ -1,13 +1,12 @@
 from vfxDatabaseORM.core import exceptions
-from vfxDatabaseORM.core.models import constants
+from vfxDatabaseORM.core.models.constants import LOOKUPS, LOOKUP_TOKEN
 
 
 class BaseField(object):
 
-    EQUAL_LOOKUP = "is"
-    LOOKUPS = [EQUAL_LOOKUP]
+    LOOKUP_TOKEN = LOOKUP_TOKEN
 
-    LOOKUP_TOKEN = constants.LOOKUP_TOKEN
+    LOOKUPS = [LOOKUPS.EQUAL]
 
     related = False
 
@@ -130,21 +129,21 @@ class Field(BaseField):
     """A Simple field"""
 
     LOOKUPS = [
-        BaseField.EQUAL_LOOKUP,
-        "isnot",
-        "lt",
-        "gt",
-        "contains",
-        "in",
-        "startswith",
-        "endswith",
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+        LOOKUPS.LESS_THAN,
+        LOOKUPS.GREATER_THAN,
+        LOOKUPS.CONTAINS,
+        LOOKUPS.IN,
+        LOOKUPS.STARTS_WITH,
+        LOOKUPS.ENDS_WITH,
     ]
 
     related = False
 
 class RelatedField(BaseField):
 
-    LOOKUPS = [BaseField.EQUAL_LOOKUP]
+    LOOKUPS = [LOOKUPS.EQUAL]
 
     is_many_to_many = False
     is_one_to_many = False
@@ -168,10 +167,10 @@ class IntegerField(Field):
     """A Field which implements an Integer"""
 
     LOOKUPS = [
-        BaseField.EQUAL_LOOKUP,
-        "isnot",
-        "lt",
-        "gt",
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+        LOOKUPS.LESS_THAN,
+        LOOKUPS.GREATER_THAN,
     ]
 
     def check_value(self, value):
