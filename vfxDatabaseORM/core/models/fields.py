@@ -9,7 +9,7 @@ class BaseField(object):
 
     LOOKUP_TOKEN = constants.LOOKUP_TOKEN
 
-    _related = False
+    related = False
 
     def __init__(
         self, db_name, description=None, default=None, read_only=False
@@ -140,7 +140,7 @@ class Field(BaseField):
         "endswith",
     ]
 
-    _related = False
+    related = False
 
 class RelatedField(BaseField):
 
@@ -150,7 +150,7 @@ class RelatedField(BaseField):
     is_one_to_many = False
     is_one_to_one = False
 
-    _related = True
+    related = True
 
     def __init__(self, db_name, to, *args, **kwargs):
 
