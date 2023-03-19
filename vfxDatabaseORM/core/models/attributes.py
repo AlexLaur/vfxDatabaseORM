@@ -15,6 +15,12 @@ class AttributeDescriptor(object):
 
     def __get__(self, instance, owner):
 
+        if not instance:
+            raise exceptions.ModelNotInstantiated(
+                "Attributes can only be retrieved on an instance of a Model "
+                "and not directly on the Model class itself."
+            )
+
         if self._field.related:
 
             related_model = instance._graph.get_node_model(self._field.to)

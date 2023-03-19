@@ -22,6 +22,10 @@ class ModelNotDefined(Exception):
     pass
 
 
+class ModelNotInstantiated(Exception):
+    pass
+
+
 class ModelNotRegistered(Exception):
     pass
 
