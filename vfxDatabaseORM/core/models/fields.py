@@ -1,3 +1,7 @@
+import datetime
+
+import six
+
 from vfxDatabaseORM.core import exceptions
 from vfxDatabaseORM.core.models.constants import LOOKUPS, LOOKUP_TOKEN
 
@@ -178,6 +182,115 @@ class IntegerField(Field):
             return False
         return super(IntegerField, self).check_value(value)
 
+
+class StringField(Field):
+    """A Field which implements a String"""
+
+    LOOKUPS = [
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+        LOOKUPS.CONTAINS,
+        LOOKUPS.IN,
+        LOOKUPS.STARTS_WITH,
+        LOOKUPS.ENDS_WITH,
+    ]
+
+    def __init__(self, db_name, max_width=None, *args, **kwargs):
+
+        self._max_width = max_width
+
+        super(StringField, self).__init__(db_name, *args, **kwargs)
+
+    def check_value(self, value):
+        if not isinstance(value, six.string_types):
+            return False
+        if self._max_width:
+            if len(value) > self._max_width:
+                return False
+        return super(StringField, self).check_value(value)
+
+class FloatField(Field):
+    """A Field which implements a Float"""
+
+    LOOKUPS = [
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+        LOOKUPS.LESS_THAN,
+        LOOKUPS.LESS_THAN_OR_EQUAL,
+        LOOKUPS.GREATER_THAN,
+        LOOKUPS.GREATER_THAN_OR_EQUAL,
+    ]
+
+    def check_value(self, value):
+        if not isinstance(value, float):
+            return False
+        return super(FloatField, self).check_value(value)
+
+
+class BooleanField(Field):
+    """A Field which implements a Boolean"""
+
+    LOOKUPS = [
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+    ]
+
+    def check_value(self, value):
+        if not isinstance(value, bool):
+            return False
+        return super(BooleanField, self).check_value(value)
+
+
+class ListField(Field):
+    """A Field which implements a List"""
+
+    LOOKUPS = [
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+        LOOKUPS.IN,
+    ]
+
+    def check_value(self, value):
+        if not isinstance(value, list):
+            return False
+        return super(ListField, self).check_value(value)
+
+
+class DateTimeField(Field):
+    """A Field which implements a datetime.datetime"""
+
+    LOOKUPS = [
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+    ]
+
+    def __init__(self, db_name, *args, **kwargs):
+        kwargs.pop("default")
+        default = datetime.datetime.now()
+        super(DateTimeField, self).__init__(db_name, default=default, *args, **kwargs)
+
+    def check_value(self, value):
+        if not isinstance(value, datetime.datetime):
+            return False
+        return super(DateTimeField, self).check_value(value)
+
+class DateField(Field):
+    """A Field which implements a datetime.date"""
+
+    LOOKUPS = [
+        LOOKUPS.EQUAL,
+        LOOKUPS.NOT_EQUAL,
+    ]
+
+    def __init__(self, db_name, *args, **kwargs):
+        kwargs.pop("default")
+        default = datetime.date.today()
+        super(DateTimeField, self).__init__(db_name, default=default, *args, **kwargs)
+
+    def check_value(self, value):
+        if not isinstance(value, datetime.date):
+            return False
+        return super(DateTimeField, self).check_value(value)
 
 
 class OneToOneField(RelatedField):
