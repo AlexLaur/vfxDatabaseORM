@@ -13,6 +13,7 @@ class FieldBadType(Exception):
 class FieldBadValue(Exception):
     pass
 
+
 class FieldBadAttribute(Exception):
     pass
 
