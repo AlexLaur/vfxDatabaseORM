@@ -111,7 +111,7 @@ class ShotgridManager(IManager):
                     # TODO No corresponding lookup found, Raise here ?
                     continue
 
-                if not field.related:
+                if not field.is_related:
                     # It is a classic field
                     filters.append([field.db_name, sg_lookup, arg_value])
                     continue

@@ -103,9 +103,15 @@ class BaseModel(type):
 
         new_class = super(BaseModel, cls).__new__(cls, name, bases, new_attrs)
 
-        # Class created, add this to the graph as node attribute
+        # Class created, register some informations in the corresponding node
         new_class._graph.add_attribute_to_node(
             node_name=name, attribute_name="model", attribute_value=new_class
+        )
+        new_class._graph.add_attribute_to_node(
+            node_name=name, attribute_name="attributes", attribute_value=[f.name for f in options.fields]
+        )
+        new_class._graph.add_attribute_to_node(
+            node_name=name, attribute_name="related_attributes", attribute_value=[f.name for f in options.related_fields]
         )
 
         return new_class

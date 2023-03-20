@@ -22,7 +22,7 @@ class BaseField(object):
 
     LOOKUPS = [LOOKUPS.EQUAL]
 
-    related = False
+    is_related = False
 
     def __init__(
         self, db_name, description=None, default=None, read_only=False
@@ -136,7 +136,7 @@ class BaseField(object):
 
         if attribute_name != self.name:
             # This field is seems not be the right field
-            if not self.related:
+            if not self.is_related:
                 # Not a related field, nothing to do
                 return ComputedLookup(None, None, None)
 
@@ -197,7 +197,7 @@ class Field(BaseField):
         LOOKUPS.ENDS_WITH,
     ]
 
-    related = False
+    is_related = False
 
 
 class RelatedField(BaseField):
@@ -207,7 +207,7 @@ class RelatedField(BaseField):
     is_one_to_many = False
     is_one_to_one = False
 
-    related = True
+    is_related = True
 
     def __init__(self, db_name, to, related_db_name, *args, **kwargs):
         self._to = to

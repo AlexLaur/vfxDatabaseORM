@@ -20,7 +20,7 @@ class AttributeDescriptor(object):
                 "and not directly on the Model class itself."
             )
 
-        if self._field.related:
+        if self._field.is_related:
             related_model = instance._graph.get_node_model(self._field.to)
 
             if self._field.is_one_to_many:
@@ -66,7 +66,7 @@ class AttributeDescriptor(object):
             )
 
         # TODO Cannot update related field for this moment
-        if self._field.related:
+        if self._field.is_related:
             return
 
         # Check the value before storing it
