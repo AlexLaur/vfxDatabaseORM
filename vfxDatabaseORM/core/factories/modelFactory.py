@@ -1,8 +1,6 @@
 class ModelFactory(object):
-
     @staticmethod
     def build(model_class, raw_values):
-
         if not raw_values:
             raise Exception("TODO")
 

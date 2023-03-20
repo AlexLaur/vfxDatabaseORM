@@ -4,7 +4,6 @@ from vfxDatabaseORM.core import exceptions
 
 
 class Graph(object):
-
     _graph = None
 
     def __init__(self):
@@ -22,8 +21,12 @@ class Graph(object):
             )
         return self._graph.nodes(data=True)[node_name].get("model")
 
-    def add_attribute_to_node(self, node_name, attribute_name, attribute_value):
+    def add_attribute_to_node(
+        self, node_name, attribute_name, attribute_value
+    ):
         self._graph.nodes[node_name][attribute_name] = attribute_value
 
     def connect_nodes(self, node_name_a, node_name_b, on_attr):
-        self._graph.add_edge(node_name_a, node_name_b, origin=node_name_a, on_attr=on_attr)
+        self._graph.add_edge(
+            node_name_a, node_name_b, origin=node_name_a, on_attr=on_attr
+        )

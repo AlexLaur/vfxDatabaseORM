@@ -6,7 +6,6 @@ from vfxDatabaseORM.core.models.constants import LOOKUPS
 
 
 class ShotgridManager(IManager):
-
     HOST = ""
     SCRIPT_NAME = ""
     SCRIPT_KEY = ""
@@ -25,7 +24,6 @@ class ShotgridManager(IManager):
     }
 
     def __init__(self, model_class):
-
         super(ShotgridManager, self).__init__(model_class)
 
         if not self._SG_CLIENT:
@@ -44,7 +42,9 @@ class ShotgridManager(IManager):
         """
         field_names = [f.db_name for f in self.model_class.get_fields()]
 
-        query_entities = self._SG_CLIENT.find(self.model_class.entity_name, [], field_names)
+        query_entities = self._SG_CLIENT.find(
+            self.model_class.entity_name, [], field_names
+        )
 
         result = []
         for entity in query_entities:
@@ -99,13 +99,14 @@ class ShotgridManager(IManager):
         filters = []
 
         for arg_name, arg_value in kwargs.items():
-
             for field in all_fields:
                 computed_lookup = field.compute_lookup(arg_name)
                 if not computed_lookup.lookup:
                     continue
 
-                sg_lookup = self._LOOKUPS_MAPPING.get(computed_lookup.lookup, None)
+                sg_lookup = self._LOOKUPS_MAPPING.get(
+                    computed_lookup.lookup, None
+                )
                 if not sg_lookup:
                     # TODO No corresponding lookup found, Raise here ?
                     continue
@@ -116,8 +117,12 @@ class ShotgridManager(IManager):
                     continue
 
                 # It is a related field
-                related_model = self.model_class._graph.get_node_model(field.to) # TODO ugly private member access
-                related_field = related_model.get_field(computed_lookup.related_field_name)
+                related_model = self.model_class._graph.get_node_model(
+                    field.to
+                )  # TODO ugly private member access
+                related_field = related_model.get_field(
+                    computed_lookup.related_field_name
+                )
                 filters.append(
                     [
                         "{}.{}.{}".format(
@@ -126,7 +131,7 @@ class ShotgridManager(IManager):
                             related_field.db_name,
                         ),
                         computed_lookup.lookup,
-                        arg_value
+                        arg_value,
                     ]
                 )
 

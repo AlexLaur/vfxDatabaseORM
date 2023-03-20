@@ -1,6 +1,7 @@
 # Reserved key for unique identifier
 UID_KEY = "uid"
 
+
 # Lookups
 class LOOKUPS(object):
     EQUAL = "is"
@@ -13,6 +14,7 @@ class LOOKUPS(object):
     IN = "in"
     STARTS_WITH = "startswith"
     ENDS_WITH = "endswith"
+
 
 # Lookup token
 LOOKUP_TOKEN = "__"

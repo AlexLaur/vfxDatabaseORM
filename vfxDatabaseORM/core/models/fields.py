@@ -9,12 +9,15 @@ from vfxDatabaseORM.core import exceptions
 from vfxDatabaseORM.core.models.constants import LOOKUPS, LOOKUP_TOKEN
 
 
-class ComputedLookup(namedtuple("ComputedLookup", ["field_name", "related_field_name", "lookup"])):
+class ComputedLookup(
+    namedtuple(
+        "ComputedLookup", ["field_name", "related_field_name", "lookup"]
+    )
+):
     pass
 
 
 class BaseField(object):
-
     LOOKUP_TOKEN = LOOKUP_TOKEN
 
     LOOKUPS = [LOOKUPS.EQUAL]
@@ -120,12 +123,16 @@ class BaseField(object):
         # TODO this function is too complex. It should be refacto when
         # unittest will be done
         related_attribute_name = None
-        attribute_name, _, lookup = arg_with_filter.rpartition(self.LOOKUP_TOKEN)
+        attribute_name, _, lookup = arg_with_filter.rpartition(
+            self.LOOKUP_TOKEN
+        )
 
         if not attribute_name:
             # Maybe were are in a case of related lookup
             if lookup == self.name:
-                return ComputedLookup(lookup, related_attribute_name, LOOKUPS.EQUAL)
+                return ComputedLookup(
+                    lookup, related_attribute_name, LOOKUPS.EQUAL
+                )
 
         if attribute_name != self.name:
             # This field is seems not be the right field
@@ -133,7 +140,11 @@ class BaseField(object):
                 # Not a related field, nothing to do
                 return ComputedLookup(None, None, None)
 
-            related_field_name, _, related_attribute_name = attribute_name.rpartition(self.LOOKUP_TOKEN)
+            (
+                related_field_name,
+                _,
+                related_attribute_name,
+            ) = attribute_name.rpartition(self.LOOKUP_TOKEN)
             if related_field_name != self.name:
                 # Not the rigth field
                 return ComputedLookup(None, None, None)
@@ -142,7 +153,9 @@ class BaseField(object):
 
         if not lookup:
             # No lookup defined here, it is an equal by default
-            return ComputedLookup(attribute_name, related_attribute_name, LOOKUPS.EQUAL)
+            return ComputedLookup(
+                attribute_name, related_attribute_name, LOOKUPS.EQUAL
+            )
 
         if lookup not in self.LOOKUPS:
             raise exceptions.InvalidLookUp(
@@ -186,8 +199,8 @@ class Field(BaseField):
 
     related = False
 
-class RelatedField(BaseField):
 
+class RelatedField(BaseField):
     LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL, LOOKUPS.IN]
 
     is_many_to_many = False
@@ -197,7 +210,6 @@ class RelatedField(BaseField):
     related = True
 
     def __init__(self, db_name, to, related_db_name, *args, **kwargs):
-
         self._to = to
         self._related_db_name = related_db_name
 
@@ -211,7 +223,9 @@ class RelatedField(BaseField):
     def related_db_name(self):
         return self._related_db_name
 
+
 # ##########################################
+
 
 class IntegerField(Field):
     """A Field which implements an Integer"""
@@ -242,7 +256,6 @@ class StringField(Field):
     ]
 
     def __init__(self, db_name, max_width=None, *args, **kwargs):
-
         self._max_width = max_width
 
         super(StringField, self).__init__(db_name, *args, **kwargs)
@@ -254,6 +267,7 @@ class StringField(Field):
             if len(value) > self._max_width:
                 return False
         return super(StringField, self).check_value(value)
+
 
 class FloatField(Field):
     """A Field which implements a Float"""
@@ -313,12 +327,15 @@ class DateTimeField(Field):
     def __init__(self, db_name, *args, **kwargs):
         kwargs.pop("default")
         default = datetime.datetime.now()
-        super(DateTimeField, self).__init__(db_name, default=default, *args, **kwargs)
+        super(DateTimeField, self).__init__(
+            db_name, default=default, *args, **kwargs
+        )
 
     def check_value(self, value):
         if not isinstance(value, datetime.datetime):
             return False
         return super(DateTimeField, self).check_value(value)
+
 
 class DateField(Field):
     """A Field which implements a datetime.date"""
@@ -331,7 +348,9 @@ class DateField(Field):
     def __init__(self, db_name, *args, **kwargs):
         kwargs.pop("default")
         default = datetime.date.today()
-        super(DateField, self).__init__(db_name, default=default, *args, **kwargs)
+        super(DateField, self).__init__(
+            db_name, default=default, *args, **kwargs
+        )
 
     def check_value(self, value):
         if not isinstance(value, datetime.date):

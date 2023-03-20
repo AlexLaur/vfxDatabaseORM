@@ -14,7 +14,6 @@ class AttributeDescriptor(object):
         self._attribute_name = "_{field_name}".format(field_name=field.name)
 
     def __get__(self, instance, owner):
-
         if not instance:
             raise exceptions.ModelNotInstantiated(
                 "Attributes can only be retrieved on an instance of a Model "
@@ -22,7 +21,6 @@ class AttributeDescriptor(object):
             )
 
         if self._field.related:
-
             related_model = instance._graph.get_node_model(self._field.to)
 
             if self._field.is_one_to_many:
@@ -53,7 +51,9 @@ class AttributeDescriptor(object):
             if not self._field.check_value(value):
                 raise exceptions.FieldBadValue(
                     "The given value '{value}' is not valid "
-                    "for this kind of field '{field}'.".format(value=value, field=self._field)
+                    "for this kind of field '{field}'.".format(
+                        value=value, field=self._field
+                    )
                 )
             setattr(instance, self._attribute_name, value)
             return
@@ -73,7 +73,9 @@ class AttributeDescriptor(object):
         if not self._field.check_value(value):
             raise exceptions.FieldBadValue(
                 "The given value '{value}' is not valid "
-                "for this kind of field '{field}'.".format(value=value, field=self._field)
+                "for this kind of field '{field}'.".format(
+                    value=value, field=self._field
+                )
             )
 
         # The field has been changed, mark it as changed.

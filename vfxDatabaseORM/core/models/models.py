@@ -9,6 +9,7 @@ from vfxDatabaseORM.core.interfaces import IManager
 
 from vfxDatabaseORM.core.models.graph import Graph
 
+
 class BaseModel(type):
     """Metaclass for all models"""
 
@@ -18,7 +19,6 @@ class BaseModel(type):
     _graph = None  # Singleton Graph
 
     def __new__(cls, name, bases, attrs, **kwargs):
-
         # Initialize the graph for all futures entities and links
         if not cls._graph:
             cls._graph = Graph()
@@ -65,7 +65,6 @@ class BaseModel(type):
         options = Options()
 
         for attr_name, attr_value in attrs.items():
-
             if not isinstance(attr_value, (Field, RelatedField)):
                 continue
 
@@ -105,7 +104,9 @@ class BaseModel(type):
         new_class = super(BaseModel, cls).__new__(cls, name, bases, new_attrs)
 
         # Class created, add this to the graph as node attribute
-        new_class._graph.add_attribute_to_node(node_name=name, attribute_name="model", attribute_value=new_class)
+        new_class._graph.add_attribute_to_node(
+            node_name=name, attribute_name="model", attribute_value=new_class
+        )
 
         return new_class
 
@@ -129,7 +130,6 @@ class BaseModel(type):
 
 @six.add_metaclass(BaseModel)
 class Model(object):
-
     entity_name = ""
 
     # Default field to identify an entity in a database
@@ -208,5 +208,7 @@ class Model(object):
             if field.name == field_name:
                 return field
         raise exceptions.FieldNotFound(
-            "This Model doesn't have a Field named '{name}'.".format(name=field_name)
+            "This Model doesn't have a Field named '{name}'.".format(
+                name=field_name
+            )
         )
