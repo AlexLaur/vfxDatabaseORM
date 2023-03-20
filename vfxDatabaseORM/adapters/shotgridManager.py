@@ -72,7 +72,9 @@ class ShotgridManager(IManager):
             field_names,
         )
 
-        # TODO raise or return None if nothing found ?
+        if not query_entity:
+            # No entity found, return None
+            return None
 
         model_instance = ModelFactory.build(
             model_class=self.model_class, raw_values=query_entity
@@ -91,23 +93,44 @@ class ShotgridManager(IManager):
             # No filters supplied, let's return like the all() method.
             return self.all()
 
-        model_fields = self.model_class.get_fields()
+        all_fields = self.model_class.get_all_fields()
 
+        field_names = [f.db_name for f in self.model_class.get_fields()]
         filters = []
-        field_names = [f.db_name for f in model_fields]
 
         for arg_name, arg_value in kwargs.items():
-            for field in model_fields:
-                lookup = field.compute_lookup(arg_name)
-                if not lookup:
+
+            for field in all_fields:
+                computed_lookup = field.compute_lookup(arg_name)
+                if not computed_lookup.lookup:
                     continue
 
-                sg_lookup = self._LOOKUPS_MAPPING.get(lookup, None)
+                sg_lookup = self._LOOKUPS_MAPPING.get(computed_lookup.lookup, None)
                 if not sg_lookup:
-                    # TODO Raise here ?
+                    # TODO No corresponding lookup found, Raise here ?
                     continue
 
-                filters.append([field.db_name, sg_lookup, arg_value])
+                if not field.related:
+                    # It is a classic field
+                    filters.append([field.db_name, sg_lookup, arg_value])
+                    continue
+
+                # It is a related field
+                related_model = self.model_class._graph.get_node_model(field.to) # TODO ugly private member access
+                related_field = related_model.get_field(computed_lookup.related_field_name)
+                filters.append(
+                    [
+                        "{}.{}.{}".format(
+                            field.db_name,
+                            related_model.entity_name,
+                            related_field.db_name,
+                        ),
+                        computed_lookup.lookup,
+                        arg_value
+                    ]
+                )
+
+        # print(self.model_class.entity_name, filters, field_names)
 
         query_entities = self._SG_CLIENT.find(
             self.model_class.entity_name, filters, field_names

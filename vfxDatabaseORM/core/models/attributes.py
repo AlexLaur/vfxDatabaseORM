@@ -26,13 +26,16 @@ class AttributeDescriptor(object):
             related_model = instance._graph.get_node_model(self._field.to)
 
             if self._field.is_one_to_many:
-                return related_model.objects.all() # TODO should be filtered by id of the instance
+                # return related_model.objects.filters() # TODO should be filtered by id of the instance
+                return []
 
             elif self._field.is_one_to_one:
-                return related_model.objects.get(-1) # TODO should be filtered by id of the instance
+                # return related_model.objects.get(-1) # TODO should be filtered by id of the instance
+                return None
 
             elif self._field.is_many_to_many:
-                return related_model.objects.all() # TODO what here ?
+                # return related_model.objects.all() # TODO what here ?
+                return []
 
             else:
                 # Should never hapen here
@@ -47,6 +50,11 @@ class AttributeDescriptor(object):
 
     def __set__(self, instance, value):
         if not instance._initialized:
+            if not self._field.check_value(value):
+                raise exceptions.FieldBadValue(
+                    "The given value '{value}' is not valid "
+                    "for this kind of field '{field}'.".format(value=value, field=self._field)
+                )
             setattr(instance, self._attribute_name, value)
             return
 

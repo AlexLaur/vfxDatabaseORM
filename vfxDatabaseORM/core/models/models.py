@@ -89,7 +89,8 @@ class BaseModel(type):
             if isinstance(attr_value, RelatedField):
                 # Register field in options
                 options.add_related_field(field)
-                # Connect nodes together
+                # Connect nodes together, If the field.to node is not created
+                # it will be created.
                 cls._graph.connect_nodes(name, field.to, field.name)
 
             # Create and set descriptors for basic fields
@@ -107,8 +108,6 @@ class BaseModel(type):
         new_class._graph.add_attribute_to_node(node_name=name, attribute_name="model", attribute_value=new_class)
 
         return new_class
-
-        # return super(BaseModel, cls).__new__(cls, name, bases, new_attrs)
 
     @property
     def objects(cls):
@@ -140,8 +139,6 @@ class Model(object):
         """Constructor of the Model.
         Each given attribute is set of the corresponding field.
         """
-        # fields = self.get_fields()
-        # related_fields = self.get_related_fields()
         fields = self.get_fields()
         field_names = [field.name for field in fields]
 
@@ -170,6 +167,18 @@ class Model(object):
         :rtype: list
         """
         return cls._meta.related_fields
+
+    @classmethod
+    def get_all_fields(cls):
+        """Get all fields (classic and related) of the Model.
+
+        :return: List of all fields
+        :rtype: list
+        """
+        fields = []
+        fields.extend(cls._meta.fields)
+        fields.extend(cls._meta.related_fields)
+        return fields
 
     @classmethod
     def get_field(cls, field_name):

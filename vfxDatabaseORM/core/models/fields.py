@@ -1,9 +1,16 @@
 import datetime
 
+from collections import namedtuple
+import unittest
+
 import six
 
 from vfxDatabaseORM.core import exceptions
 from vfxDatabaseORM.core.models.constants import LOOKUPS, LOOKUP_TOKEN
+
+
+class ComputedLookup(namedtuple("ComputedLookup", ["field_name", "related_field_name", "lookup"])):
+    pass
 
 
 class BaseField(object):
@@ -84,26 +91,59 @@ class BaseField(object):
         """Compute the argument in order to extract the lookup
 
         >>> compute_lookup(uid__lt)
-        >>> lt
+        >>> ComputedLookup.field_name # uid
+        >>> ComputedLookup.related_field_name # None
+        >>> ComputedLookup.lookup # lt
+
         >>> compute_lookup(name__startswith)
-        >>> startswith
+        >>> ComputedLookup.field_name # name
+        >>> ComputedLookup.related_field_name # None
+        >>> ComputedLookup.lookup # startswith
+
         >>> compute_lookup(uid) # default imprementation is the equality
-        >>> is
+        >>> ComputedLookup.field_name # uid
+        >>> ComputedLookup.related_field_name # None
+        >>> ComputedLookup.lookup # is
+
+        >>> compute_lookup(project__uid__lt) # default imprementation is the equality
+        >>> ComputedLookup.field_name # project
+        >>> ComputedLookup.related_field_name # uid
+        >>> ComputedLookup.lookup # lt
 
         :param arg_with_filter: The argument with the lookup
         :type arg_with_filter: str
         :raises exceptions.InvalidLookUp: Raised if the lookup is not defined
         for this field.
-        :return: The extracted lookup
-        :rtype: str
+        :return: The computed lookup
+        :rtype: ComputedLookup
         """
-        arg_name, _, lookup = arg_with_filter.partition(self.LOOKUP_TOKEN)
-        if arg_name != self.name:
-            # This field is not the right field
-            return None
+        # TODO this function is too complex. It should be refacto when
+        # unittest will be done
+        related_attribute_name = None
+        attribute_name, _, lookup = arg_with_filter.rpartition(self.LOOKUP_TOKEN)
+
+        if not attribute_name:
+            # Maybe were are in a case of related lookup
+            if lookup == self.name:
+                return ComputedLookup(lookup, related_attribute_name, LOOKUPS.EQUAL)
+
+        if attribute_name != self.name:
+            # This field is seems not be the right field
+            if not self.related:
+                # Not a related field, nothing to do
+                return ComputedLookup(None, None, None)
+
+            related_field_name, _, related_attribute_name = attribute_name.rpartition(self.LOOKUP_TOKEN)
+            if related_field_name != self.name:
+                # Not the rigth field
+                return ComputedLookup(None, None, None)
+
+            attribute_name = related_field_name
+
         if not lookup:
             # No lookup defined here, it is an equal by default
-            return self.EQUAL_LOOKUP
+            return ComputedLookup(attribute_name, related_attribute_name, LOOKUPS.EQUAL)
+
         if lookup not in self.LOOKUPS:
             raise exceptions.InvalidLookUp(
                 "The lookup '{lookup}' is not valid. "
@@ -111,7 +151,8 @@ class BaseField(object):
                     lookup=lookup, lookups=self.LOOKUPS
                 )
             )
-        return lookup
+
+        return ComputedLookup(attribute_name, related_attribute_name, lookup)
 
     def check_value(self, value):
         """Check the value for this field
@@ -147,7 +188,7 @@ class Field(BaseField):
 
 class RelatedField(BaseField):
 
-    LOOKUPS = [LOOKUPS.EQUAL]
+    LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL, LOOKUPS.IN]
 
     is_many_to_many = False
     is_one_to_many = False
@@ -155,15 +196,20 @@ class RelatedField(BaseField):
 
     related = True
 
-    def __init__(self, db_name, to, *args, **kwargs):
+    def __init__(self, db_name, to, related_db_name, *args, **kwargs):
 
         self._to = to
+        self._related_db_name = related_db_name
 
         super(RelatedField, self).__init__(db_name, *args, **kwargs)
 
     @property
     def to(self):
         return self._to
+
+    @property
+    def related_db_name(self):
+        return self._related_db_name
 
 # ##########################################
 
@@ -285,12 +331,12 @@ class DateField(Field):
     def __init__(self, db_name, *args, **kwargs):
         kwargs.pop("default")
         default = datetime.date.today()
-        super(DateTimeField, self).__init__(db_name, default=default, *args, **kwargs)
+        super(DateField, self).__init__(db_name, default=default, *args, **kwargs)
 
     def check_value(self, value):
         if not isinstance(value, datetime.date):
             return False
-        return super(DateTimeField, self).check_value(value)
+        return super(DateField, self).check_value(value)
 
 
 class OneToOneField(RelatedField):

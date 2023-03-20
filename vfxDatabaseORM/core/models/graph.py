@@ -12,7 +12,7 @@ class Graph(object):
             self._graph = nx.Graph()
 
     def add_node(self, node_name):
-        self._graph.add_node(node_name)
+        self._graph.add_node(node_name, model=None)
 
     def get_node_model(self, node_name):
         if node_name not in self._graph.nodes:
