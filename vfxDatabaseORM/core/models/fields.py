@@ -261,6 +261,10 @@ class StringField(Field):
 
         super(StringField, self).__init__(db_name, *args, **kwargs)
 
+    @property
+    def max_width(self):
+        return self._max_width
+
     def check_value(self, value):
         if not isinstance(value, six.string_types):
             return False
@@ -313,7 +317,7 @@ class ListField(Field):
     ]
 
     def check_value(self, value):
-        if not isinstance(value, list):
+        if not isinstance(value, (list, tuple)):
             return False
         return super(ListField, self).check_value(value)
 
