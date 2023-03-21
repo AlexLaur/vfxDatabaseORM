@@ -8,5 +8,4 @@ class ModelFactory(object):
                 if value_name != field.db_name:
                     continue
                 kwargs[field.name] = value
-
         return model_class(**kwargs)
