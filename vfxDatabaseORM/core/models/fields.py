@@ -1,7 +1,6 @@
 import datetime
 
 from collections import namedtuple
-import unittest
 
 import six
 
@@ -193,6 +192,7 @@ class Field(BaseField):
         LOOKUPS.GREATER_THAN,
         LOOKUPS.CONTAINS,
         LOOKUPS.IN,
+        LOOKUPS.NOT_IN,
         LOOKUPS.STARTS_WITH,
         LOOKUPS.ENDS_WITH,
     ]
@@ -201,7 +201,7 @@ class Field(BaseField):
 
 
 class RelatedField(BaseField):
-    LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL, LOOKUPS.IN]
+    LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL, LOOKUPS.IN, LOOKUPS.NOT_IN]
 
     is_many_to_many = False
     is_one_to_many = False
@@ -251,6 +251,7 @@ class StringField(Field):
         LOOKUPS.NOT_EQUAL,
         LOOKUPS.CONTAINS,
         LOOKUPS.IN,
+        LOOKUPS.NOT_IN,
         LOOKUPS.STARTS_WITH,
         LOOKUPS.ENDS_WITH,
     ]
@@ -308,6 +309,7 @@ class ListField(Field):
         LOOKUPS.EQUAL,
         LOOKUPS.NOT_EQUAL,
         LOOKUPS.IN,
+        LOOKUPS.NOT_IN,
     ]
 
     def check_value(self, value):
@@ -322,10 +324,12 @@ class DateTimeField(Field):
     LOOKUPS = [
         LOOKUPS.EQUAL,
         LOOKUPS.NOT_EQUAL,
+        LOOKUPS.GREATER_THAN,
+        LOOKUPS.LESS_THAN,
     ]
 
     def __init__(self, db_name, *args, **kwargs):
-        kwargs.pop("default")
+        kwargs.pop("default", None)
         default = datetime.datetime.now()
         super(DateTimeField, self).__init__(
             db_name, default=default, *args, **kwargs
@@ -343,10 +347,12 @@ class DateField(Field):
     LOOKUPS = [
         LOOKUPS.EQUAL,
         LOOKUPS.NOT_EQUAL,
+        LOOKUPS.GREATER_THAN,
+        LOOKUPS.LESS_THAN,
     ]
 
     def __init__(self, db_name, *args, **kwargs):
-        kwargs.pop("default")
+        kwargs.pop("default", None)
         default = datetime.date.today()
         super(DateField, self).__init__(
             db_name, default=default, *args, **kwargs

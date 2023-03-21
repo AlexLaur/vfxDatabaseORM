@@ -12,6 +12,7 @@ class LOOKUPS(object):
     GREATER_THAN_OR_EQUAL = "gte"
     CONTAINS = "contains"
     IN = "in"
+    NOT_IN = "notin"
     STARTS_WITH = "startswith"
     ENDS_WITH = "endswith"
 
