@@ -218,3 +218,9 @@ class Model(object):
                 name=field_name
             )
         )
+
+    def __repr__(self):
+        return "<{cls_name} uid={entity_id}>".format(
+        cls_name=self.__class__.__name__,
+        entity_id=self.uid,
+    )

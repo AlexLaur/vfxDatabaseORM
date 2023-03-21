@@ -18,6 +18,10 @@ class FieldBadAttribute(Exception):
     pass
 
 
+class FieldRelatedError(Exception):
+    pass
+
+
 class InvalidLookUp(Exception):
     pass
 
