@@ -156,6 +156,12 @@ class Model(object):
 
         self._initialized = True
 
+    def save(self, **kwargs):
+        raise NotImplementedError()
+
+    def delete(self):
+        raise NotImplementedError()
+
     @classmethod
     def get_fields(cls):
         """Get the list of all basic fields in this Model.
