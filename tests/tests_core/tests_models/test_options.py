@@ -5,9 +5,7 @@ from vfxDatabaseORM.core.models.options import Options
 
 
 class TestOptions(unittest.TestCase):
-
     def test_CASE_attributes_SHOULD_return_attributes(self):
-
         field = Field("foo")
         related_field = RelatedField("bar", to="Bar", related_db_name="baz")
 
@@ -22,7 +20,6 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(options.related_fields, [related_field])
 
     def test_CASE_add_fields(self):
-
         field = Field("foo")
 
         options = Options()
@@ -36,7 +33,6 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(len(options.related_fields), 0)
 
     def test_CASE_add_related_fields(self):
-
         field = RelatedField("bar", to="Bar", related_db_name="baz")
 
         options = Options()
