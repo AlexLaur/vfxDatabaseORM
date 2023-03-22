@@ -1,7 +1,9 @@
 import datetime
 import unittest
 
+from vfxDatabaseORM.core import exceptions
 from vfxDatabaseORM.core.models.fields import (
+    ComputedLookup,
     Field,
     RelatedField,
     IntegerField,
@@ -44,6 +46,14 @@ class TestField(unittest.TestCase):
         field = Field(
             db_name="foo", description="test", default="bar", read_only=True
         )
+        field._name = "foo"  # Normally it is done in the model base class
+
+        result = field.compute_lookup("foo")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertEqual(result.field_name, "foo")
+        self.assertEqual(result.related_field_name, None)
+        self.assertEqual(result.lookup, "is")
 
     def test_CASE_compute_lookup_WITH_lookup_SHOULD_return_computed_lookup(
         self,
@@ -51,18 +61,89 @@ class TestField(unittest.TestCase):
         field = Field(
             db_name="foo", description="test", default="bar", read_only=True
         )
+        field._name = "foo"  # Normally it is done in the model base class
+
+        result = field.compute_lookup("foo__is")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertEqual(result.field_name, "foo")
+        self.assertEqual(result.related_field_name, None)
+        self.assertEqual(result.lookup, "is")
+
+        result = field.compute_lookup("foo__startswith")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertEqual(result.field_name, "foo")
+        self.assertEqual(result.related_field_name, None)
+        self.assertEqual(result.lookup, "startswith")
 
     def test_CASE_compute_lookup_WITH_related_lookup_SHOULD_return_computed_lookup(
+        self,
+    ):
+        field = RelatedField(
+            db_name="foo",
+            to="Fake",
+            related_db_name="bar",
+            description="test",
+            default="bar",
+            read_only=True,
+        )
+        field._name = "foo"  # Normally it is done in the model base class
+
+        result = field.compute_lookup("foo__is")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertEqual(result.field_name, "foo")
+        self.assertEqual(result.related_field_name, None)
+        self.assertEqual(result.lookup, "is")
+
+        result = field.compute_lookup("foo__temp__is")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertEqual(result.field_name, "foo")
+        self.assertEqual(result.related_field_name, "temp")
+        self.assertEqual(result.lookup, "is")
+
+    def test_CASE_compute_lookup_WITH_invalid_name_lookup_SHOULD_return_computed_lookup(
         self,
     ):
         field = Field(
             db_name="foo", description="test", default="bar", read_only=True
         )
+        field._name = "foo"  # Normally it is done in the model base class
+
+        result = field.compute_lookup("whatever__is")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertIsNone(result.field_name)
+        self.assertIsNone(result.related_field_name)
+        self.assertIsNone(result.lookup)
+
+        field = RelatedField(
+            db_name="foo",
+            to="Fake",
+            related_db_name="bar",
+            description="test",
+            default="bar",
+            read_only=True,
+        )
+        field._name = "foo"  # Normally it is done in the model base class
+
+        result = field.compute_lookup("whatever__temp__is")
+
+        self.assertIsInstance(result, ComputedLookup)
+        self.assertIsNone(result.field_name)
+        self.assertIsNone(result.related_field_name)
+        self.assertIsNone(result.lookup)
 
     def test_CASE_compute_lookup_WITH_invalid_lookup_SHOULD_raise(self):
         field = Field(
             db_name="foo", description="test", default="bar", read_only=True
         )
+        field._name = "foo"  # Normally it is done in the model base class
+
+        with self.assertRaises(exceptions.InvalidLookUp):
+            field.compute_lookup("foo__42")
 
 
 class TestRelatedField(unittest.TestCase):
