@@ -119,41 +119,41 @@ class BaseField(object):
         :return: The computed lookup
         :rtype: ComputedLookup
         """
-        # TODO this function is too complex. It should be refacto when
-        # unittest will be done
-        related_attribute_name = None
-        attribute_name, _, lookup = arg_with_filter.rpartition(
-            self.LOOKUP_TOKEN
-        )
+        args = arg_with_filter.split(self.LOOKUP_TOKEN)
+        field_name = None
+        related_field_name = None
+        lookup = None
 
-        if not attribute_name:
-            # Maybe were are in a case of related lookup
-            if lookup == self.name:
-                return ComputedLookup(
-                    lookup, related_attribute_name, LOOKUPS.EQUAL
-                )
+        if len(args) == 3:
+            # related field
+            field_name, related_field_name, lookup = args
+        elif len(args) == 2:
+            # classic field with lookup
+            field_name, lookup = args
+        elif len(args) == 1:
+            # classic field without lookup
+            field_name = args[0]
+        else:
+            # More than tree level, it is not supported yet
+            raise exceptions.InvalidLookUp(
+                "Only first deph lookup works."
+            )
 
-        if attribute_name != self.name:
+        if field_name != self.name:
             # This field is seems not be the right field
-            if not self.is_related:
-                # Not a related field, nothing to do
-                return ComputedLookup(None, None, None)
+            return ComputedLookup(None, None, None)
 
-            (
-                related_field_name,
-                _,
-                related_attribute_name,
-            ) = attribute_name.rpartition(self.LOOKUP_TOKEN)
-            if related_field_name != self.name:
-                # Not the rigth field
-                return ComputedLookup(None, None, None)
+        if related_field_name and not self.is_related:
+            # Reltated lookup on a field which is not related
+            raise exceptions.InvalidLookUp(
+                "You can't build a filter for related field with a field "
+                "which is not a related field."
+            )
 
-            attribute_name = related_field_name
-
-        if not lookup:
+        if lookup is None:
             # No lookup defined here, it is an equal by default
             return ComputedLookup(
-                attribute_name, related_attribute_name, LOOKUPS.EQUAL
+                field_name, related_field_name, LOOKUPS.EQUAL
             )
 
         if lookup not in self.LOOKUPS:
@@ -164,7 +164,7 @@ class BaseField(object):
                 )
             )
 
-        return ComputedLookup(attribute_name, related_attribute_name, lookup)
+        return ComputedLookup(field_name, related_field_name, lookup)
 
     def check_value(self, value):
         """Check the value for this field
