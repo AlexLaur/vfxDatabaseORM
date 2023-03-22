@@ -1,5 +1,5 @@
 from vfxDatabaseORM.core import exceptions
-from vfxDatabaseORM.core.models.constants import LOOKUP_TOKEN, LOOKUPS
+from vfxDatabaseORM.core.models import constants
 
 
 class AttributeDescriptor(object):
@@ -21,97 +21,68 @@ class AttributeDescriptor(object):
                 "and not directly on the Model class itself."
             )
 
-        # TODO refacto this long part
-        if self._field.is_related:
-            related_model = instance._graph.get_node_model(self._field.to)
+        if not self._field.is_related:
+            # It is not a related field, simply return the value.
+            return getattr(instance, self._attribute_name)
 
-            if self._field.is_one_to_many or self._field.is_many_to_many:
-                related_db_name = self._field.related_db_name
-                related_model_fields = related_model.get_related_fields()
+        related_model = instance._graph.get_node_model(self._field.to)
+        related_db_name = self._field.related_db_name
+        related_model_fields = related_model.get_related_fields()
 
-                related_field = None
-                for field in related_model_fields:
-                    if field.db_name == related_db_name:
-                        related_field = field
-                        break
+        related_field = None
+        for field in related_model_fields:
+            if field.db_name == related_db_name:
+                related_field = field
+                break
 
-                if not related_field:
-                    raise exceptions.FieldRelatedError(
-                        "The corresponding {} for {} "
-                        "should also be defined "
-                        "in the related model {}.".format(
-                            self._field.__class__.__name__,
-                            self._field,
-                            related_model,
-                        )
-                    )
-
-                filters = {}
-                key = "{}{}{}{}{}".format(
-                    related_field.name,
-                    LOOKUP_TOKEN,
-                    "uid",
-                    LOOKUP_TOKEN,
-                    LOOKUPS.EQUAL,
+        if not related_field:
+            raise exceptions.FieldRelatedError(
+                "The corresponding {field_class_name} for '{field}' "
+                "should also be defined "
+                "in the related model '{related_model}'.".format(
+                    field_class_name=self._field.__class__.__name__,
+                    field=self._field,
+                    related_model=related_model,
                 )
-                filters[key] = instance.uid
+            )
 
-                return related_model.objects.filters(**filters)
+        kwargs = {}
+        key = "{}{}{}{}{}".format(
+            related_field.name,
+            constants.LOOKUP_TOKEN,
+            constants.UID_KEY,
+            constants.LOOKUP_TOKEN,
+            constants.LOOKUPS.EQUAL,
+        )
+        kwargs[key] = instance.uid
 
-            elif self._field.is_one_to_one:
-                related_db_name = self._field.related_db_name
-                related_model_fields = related_model.get_related_fields()
+        result = related_model.objects.filters(**kwargs)
 
-                related_field = None
-                for field in related_model_fields:
-                    if field.db_name == related_db_name:
-                        related_field = field
-                        break
+        if self._field.is_one_to_many:
+            return result
 
-                if not related_field:
-                    raise exceptions.FieldRelatedError(
-                        "The corresponding OneToOne field for {} "
-                        "should also be defined "
-                        "in the related model {}.".format(
-                            self._field, related_model
-                        )
-                    )
+        elif self._field.is_many_to_many:
+            return result
 
-                # TODO refacto this part wich is not really good
-                # And find a way for hard coded "uid"
-                filters = {}
-                key = "{}{}{}{}{}".format(
-                    related_field.name,
-                    LOOKUP_TOKEN,
-                    "uid",
-                    LOOKUP_TOKEN,
-                    LOOKUPS.EQUAL,
+        elif self._field.is_one_to_one:
+            if not result:
+                return None
+
+            if len(result) > 1:
+                raise exceptions.FieldRelatedError(
+                    "More than one result has been found for '{field}'. "
+                    "If more than one result should be returned, "
+                    "use a OneToMany field instead.".format(field=self._field)
                 )
-                filters[key] = instance.uid
+            return result[0]
 
-                result = related_model.objects.filters(**filters)
-                if not result:
-                    return None
-
-                if len(result) > 1:
-                    raise exceptions.FieldRelatedError(
-                        "More than one result has been found for the "
-                        "OneToOne field '{}'. "
-                        "If more than one result should be returned, "
-                        "use a OneToMany field instead.".format(self._field)
-                    )
-                return result[0]
-
-            else:
-                # Should never happen here
-                raise exceptions.FieldBadType(
-                    "Unknown related field. "
-                    "Only ManyToManyField, OneToOneField and OneToManyField "
-                    "are configured here."
-                )
-
-        # It is not a related field, simply return the value.
-        return getattr(instance, self._attribute_name)
+        else:
+            # Should never happen here
+            raise exceptions.FieldBadType(
+                "Unknown related field. "
+                "Only ManyToManyField, OneToOneField and OneToManyField "
+                "are configured here."
+            )
 
     def __set__(self, instance, value):
         if not instance._initialized:
