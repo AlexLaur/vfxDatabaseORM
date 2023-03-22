@@ -1,3 +1,6 @@
+[![Python 2.7 3.x](https://img.shields.io/badge/python-2.7%20%7C%203.x-blue.svg)](https://www.python.org/)
+[![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-green)](#run-coverage-and-tests)
 # vfxDatabaseORM
 
 vfxDatabaseORM is a package designed to make some CRUD requests to your Asset Manager.
@@ -125,6 +128,14 @@ project.delete()
 - Add other adapters (Ftrack, Kitsu, DBs)
 - Add serializers to serialize a model instance
 
-# Tests
+# Run coverage and tests
+Unit tests:
+```bash
+python -m unittest discover
+```
 
-TODO
+Coverage :
+```bash
+coverage run -m unittest discover
+coverage report -m --skip-covered --skip-empty
+```

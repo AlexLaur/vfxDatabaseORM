@@ -1,0 +1,9 @@
+# - pyproject.toml -
+
+[tool.black]
+# How many characters per line to allow.
+line-length = 79
+# Don't normalize string quotes or prefixes. (e.g: replace any ' with ")
+skip-string-normalization = false
+# Don't use trailing commas as a reason to split lines.
+skip-magic-trailing-comma = true
