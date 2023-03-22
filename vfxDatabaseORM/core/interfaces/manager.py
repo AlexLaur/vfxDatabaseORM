@@ -1,6 +1,7 @@
 import abc
 
-ABC = abc.ABCMeta("ABC", (object, ), {})
+ABC = abc.ABCMeta("ABC", (object,), {})
+
 
 class IManager(ABC):
     def __init__(self, model_class):

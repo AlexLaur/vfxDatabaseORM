@@ -1,4 +1,3 @@
-from cgitb import reset
 from vfxDatabaseORM.core import exceptions
 from vfxDatabaseORM.core.models.constants import LOOKUP_TOKEN, LOOKUPS
 
@@ -41,18 +40,25 @@ class AttributeDescriptor(object):
                         "The corresponding {} for {} "
                         "should also be defined "
                         "in the related model {}.".format(
-                            self._field.__class__.__name__, self._field, related_model
+                            self._field.__class__.__name__,
+                            self._field,
+                            related_model,
                         )
                     )
 
                 filters = {}
-                key = "{}{}{}{}{}".format(related_field.name, LOOKUP_TOKEN, "uid", LOOKUP_TOKEN, LOOKUPS.EQUAL)
+                key = "{}{}{}{}{}".format(
+                    related_field.name,
+                    LOOKUP_TOKEN,
+                    "uid",
+                    LOOKUP_TOKEN,
+                    LOOKUPS.EQUAL,
+                )
                 filters[key] = instance.uid
 
                 return related_model.objects.filters(**filters)
 
             elif self._field.is_one_to_one:
-
                 related_db_name = self._field.related_db_name
                 related_model_fields = related_model.get_related_fields()
 
@@ -74,7 +80,13 @@ class AttributeDescriptor(object):
                 # TODO refacto this part wich is not really good
                 # And find a way for hard coded "uid"
                 filters = {}
-                key = "{}{}{}{}{}".format(related_field.name, LOOKUP_TOKEN, "uid", LOOKUP_TOKEN, LOOKUPS.EQUAL)
+                key = "{}{}{}{}{}".format(
+                    related_field.name,
+                    LOOKUP_TOKEN,
+                    "uid",
+                    LOOKUP_TOKEN,
+                    LOOKUPS.EQUAL,
+                )
                 filters[key] = instance.uid
 
                 result = related_model.objects.filters(**filters)

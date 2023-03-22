@@ -10,8 +10,18 @@ class Graph(object):
         if not self._graph:
             self._graph = nx.Graph()
 
+    @property
+    def nodes(self):
+        return list(self._graph.nodes(data=True))
+
+    @property
+    def edges(self):
+        return list(self._graph.edges(data=True))
+
     def add_node(self, node_name):
-        self._graph.add_node(node_name, model=None, attributes=[], related_attributes=[])
+        self._graph.add_node(
+            node_name, model=None, attributes=[], related_attributes=[]
+        )
 
     def get_node_model(self, node_name):
         if node_name not in self._graph.nodes:

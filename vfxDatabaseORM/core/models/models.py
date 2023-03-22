@@ -108,10 +108,14 @@ class BaseModel(type):
             node_name=name, attribute_name="model", attribute_value=new_class
         )
         new_class._graph.add_attribute_to_node(
-            node_name=name, attribute_name="attributes", attribute_value=[f.name for f in options.fields]
+            node_name=name,
+            attribute_name="attributes",
+            attribute_value=[f.name for f in options.fields],
         )
         new_class._graph.add_attribute_to_node(
-            node_name=name, attribute_name="related_attributes", attribute_value=[f.name for f in options.related_fields]
+            node_name=name,
+            attribute_name="related_attributes",
+            attribute_value=[f.name for f in options.related_fields],
         )
 
         return new_class
@@ -225,8 +229,11 @@ class Model(object):
             )
         )
 
+    def __eq__(self, other):
+        return self.uid == other.uid
+
     def __repr__(self):
         return "<{cls_name} uid={entity_id}>".format(
-        cls_name=self.__class__.__name__,
-        entity_id=self.uid,
-    )
+            cls_name=self.__class__.__name__,
+            entity_id=self.uid,
+        )

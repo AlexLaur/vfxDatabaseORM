@@ -1,5 +1,5 @@
 from .fields import (
-    Field,
+    Field,  # TODO remove this
     IntegerField,
     BooleanField,
     FloatField,
