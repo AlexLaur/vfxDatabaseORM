@@ -3,8 +3,6 @@ import unittest
 from vfxDatabaseORM.core import models, exceptions
 from vfxDatabaseORM.core.models.fields import RelatedField
 from vfxDatabaseORM.core.interfaces import IManager
-from vfxDatabaseORM.core.models.attributes import AttributeDescriptor
-
 
 class FakeBadRelatedField(RelatedField):
     is_many_to_many = False
