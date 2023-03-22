@@ -20,11 +20,11 @@ class IManager(ABC):
         pass
 
     @abc.abstractmethod
-    def create(self, data):
+    def create(self, instance):
         pass
 
     @abc.abstractmethod
-    def update(self, uid, new_data):
+    def update(self, instance):
         pass
 
     @abc.abstractmethod

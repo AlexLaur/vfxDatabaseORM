@@ -2,12 +2,11 @@ import six
 
 from vfxDatabaseORM.core import exceptions
 from vfxDatabaseORM.core.models import constants
+from vfxDatabaseORM.core.models.graph import Graph
 from vfxDatabaseORM.core.models.options import Options
 from vfxDatabaseORM.core.models.attributes import AttributeDescriptor
 from vfxDatabaseORM.core.models.fields import Field, RelatedField, IntegerField
 from vfxDatabaseORM.core.interfaces import IManager
-
-from vfxDatabaseORM.core.models.graph import Graph
 
 
 class BaseModel(type):
@@ -161,7 +160,35 @@ class Model(object):
         self._initialized = True
 
     def save(self, **kwargs):
-        raise NotImplementedError()
+        if not self._changed and not kwargs:
+            # Nothing has changed, nothing to update
+            return
+
+        # No uid, create the entity on the database
+        if not self.uid:
+            # TODO and what happen if we supercharge uid field with default to -1 ?
+
+            # Need to create the entity
+            self.__class__.objects.create(self)
+            # Reset changed fields
+            self._changed = []
+            return
+
+        # 1. Loop through kwargs and update Model properties
+        fields = self.get_fields()
+        field_names = [field.name for field in fields]
+
+        for key, value in kwargs.items():
+            if key not in field_names:
+                # An unknow attribute has been given here...
+                continue
+            setattr(self, key, value)
+
+        # 2. Update the model on the database
+        self.__class__.objects.update(self)
+
+        # Reset changed fields
+        self._changed = []
 
     def delete(self):
         raise NotImplementedError()
