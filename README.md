@@ -13,6 +13,10 @@ It is designed like the powerful Django ORM.
 
 
 The following exemple demonstrates a use case with `Shotgrid`.
+> Note: Field `id` is implicit (used in major databases system).
+> You can get it with: `instance.uid`
+
+> If you need to redefine it, you can by adding : `uid = models.IntegerField("id", default=0)` into yours models.
 
 ```python
 from vfxDatabaseORM.core import models
@@ -29,7 +33,6 @@ class Project(models.Model):
     manager_class = MyShotgridManager  # Manager for SG
     entity_name = "Project"  # Entity name on SG
 
-    uid = models.IntegerField("id", read_only=True, default=-1) # The uid field is "id" on SG
     code = models.StringField("name") # The code field is "name" on SG
     created_at = models.DateTimeField("created_at", read_only=True)
 
@@ -39,7 +42,6 @@ class User(models.Model):
     manager_class = MyShotgridManager
     entity_name = "HumanUser"
 
-    uid = models.IntegerField("id", read_only=True, default=-1)
     login = models.StringField("login")
     projects = models.OneToManyField("projects", to="Project", related_db_name="users")
 ```
@@ -59,7 +61,7 @@ Related attributes are evaluated only when we try to access to them.
 ```python
 # users is a related field linked with the User Model.
 # A request to the database is done only when we get the value for this attribute
-project.users  # Will produce a request to the database
+project.users  # Will send a request to the database
 project.uid  # The value is directly returned
 ```
 # CREATE
@@ -71,7 +73,7 @@ new_project = Project.objects.create(code="foo") # Create and store it in the DB
 new_project.uid  # The id of the created project in the database.
 # or
 new_project = Project(code="foo") # Created but not stored in the DB
-new_project.uid  # -1 (default value defined in the field)
+new_project.uid  # 0 (default value defined in the field)
 new_project.save() # Store it in the DB
 new_project.uid  # The id of the created project in the database.
 ```
@@ -110,10 +112,10 @@ Project.objects.filters(users__uid__is=1, code__startswith="baz", code__endswith
 Examples of `Update` operations.
 
 ```python
-project.code = "foo"
+project.code = "foo" # Update the code only in the instance
 project.save() # Update the code in the database
 # OR
-project.save(code="bar")
+project.save(code="bar") # Update the code in the database
 ```
 
 # DELETE
@@ -121,12 +123,13 @@ project.save(code="bar")
 Examples of `Delete` operations.
 
 ```python
-project.delete()
+project.delete()  # Delete the project in the database
 ```
 
 # TODO
 - Add other adapters (Ftrack, Kitsu, DBs)
 - Add serializers to serialize a model instance
+- Add the update for related fields
 
 # Run coverage and tests
 Unit tests:
