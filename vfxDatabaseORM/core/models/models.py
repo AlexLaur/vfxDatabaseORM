@@ -148,6 +148,9 @@ class Model(object):
         """Constructor of the Model.
         Each given attribute is set of the corresponding field.
         """
+        # Init changed to an empty list
+        self._changed = []
+
         fields = self.get_fields()
         field_names = [field.name for field in fields]
 
@@ -160,19 +163,27 @@ class Model(object):
         self._initialized = True
 
     def save(self, **kwargs):
-        if not self._changed and not kwargs:
-            # Nothing has changed, nothing to update
-            return
-
         # No uid, create the entity on the database
         if not self.uid:
             # TODO and what happen if we supercharge uid field with default to -1 ?
+            fields = self.get_fields()
+            field_names = [field.name for field in fields]
+
+            for key, value in kwargs.items():
+                if key not in field_names:
+                    # An unknow attribute has been given here...
+                    continue
+                setattr(self, key, value)
 
             # Need to create the entity
             self.__class__.objects.create(self)
             # Reset changed fields
             self._changed = []
-            return
+            return True
+
+        if not self._changed and not kwargs:
+            # Nothing has changed, nothing to update
+            return False
 
         # 1. Loop through kwargs and update Model properties
         fields = self.get_fields()
@@ -184,11 +195,17 @@ class Model(object):
                 continue
             setattr(self, key, value)
 
+        # We set all given kwargs, now check if kwargs updated somthing
+        if not self._changed:
+            return False
+
         # 2. Update the model on the database
         self.__class__.objects.update(self)
 
         # Reset changed fields
         self._changed = []
+
+        return True
 
     def delete(self):
         raise NotImplementedError()

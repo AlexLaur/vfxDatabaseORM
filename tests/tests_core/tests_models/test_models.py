@@ -5,6 +5,9 @@ from vfxDatabaseORM.core.interfaces import IManager
 
 class FakeManager(IManager):
 
+    update_was_called = False
+    create_was_called = False
+
     def get(self, uid):
         return self.model_class(uid=1)
 
@@ -15,9 +18,11 @@ class FakeManager(IManager):
         return [self.model_class(uid=i) for i in range(2)]
 
     def create(self, instance):
+        FakeManager.create_was_called = True
         return True
 
     def update(self, instance):
+        FakeManager.update_was_called = True
         return True
 
     def delete(self):
@@ -31,10 +36,15 @@ class FakeModelB(models.Model):
     entity_name = "FakeModel"
     manager_class = FakeManager
 
+    name = models.StringField("name")
     related_field = models.OneToOneField("related_b", to="FakeModelA", related_db_name="retaled_a")
 
 
 class TestModel(unittest.TestCase):
+
+    def tearDown(self):
+        FakeManager.update_was_called = False
+        FakeManager.create_was_called = False
 
     def test_CASE_model_without_manager_SHOULD_raise(self):
 
@@ -83,7 +93,6 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
-
     def test_CASE_equal_SHOULD_return_bool(self):
 
         model_a_0 = FakeModelA(uid=5)
@@ -99,12 +108,67 @@ class TestModel(unittest.TestCase):
 
         self.assertFalse(model_a_0 == model_b_0)
 
-    def test_CASE_save_SHOULD_save(self):
-        # TODO
-        with self.assertRaises(NotImplementedError):
+    def test_CASE_save_WITH_unchanged_values_SHOULD_not_save(self):
 
-            model = FakeModelA(uid=5)
-            model.save()
+        model = FakeModelB(uid=1, name="foo")
+
+        result = model.save()
+        self.assertFalse(result)
+        self.assertFalse(FakeModelB.objects.update_was_called)
+
+        result = model.save(name="foo")
+        self.assertFalse(result)
+        self.assertFalse(FakeModelB.objects.update_was_called)
+
+    def test_CASE_save_WITH_changed_values_SHOULD_save(self):
+
+        model = FakeModelB(uid=1, name="foo")
+
+        result = model.save()
+        self.assertFalse(result)
+        self.assertFalse(FakeModelB.objects.update_was_called)
+
+        model.name = "bar"
+
+        result = model.save()
+        self.assertTrue(result)
+        self.assertTrue(FakeModelB.objects.update_was_called)
+
+        result = model.save(name="baz")
+        self.assertTrue(result)
+        self.assertTrue(FakeModelB.objects.update_was_called)
+
+    def test_CASE_save_WITH_changed_values_ON_bad_fields_SHOULD_not_save(self):
+
+        model = FakeModelB(uid=1, name="foo")
+
+        result = model.save(whatever="bar")
+        self.assertFalse(result)
+        self.assertFalse(FakeModelB.objects.update_was_called)
+        self.assertFalse(FakeModelB.objects.create_was_called)
+
+    def test_CASE_save_WITH_changed_values_ON_new_object_SHOULD_not_create(self):
+
+        model = FakeModelB(name="foo") # uid set to 0
+
+        result = model.save()
+        self.assertTrue(result)
+        self.assertFalse(FakeModelB.objects.update_was_called)
+        self.assertTrue(FakeModelB.objects.create_was_called)
+
+    def test_CASE_save_WITH_bad_values_for_field_ON_existed_object_SHOULD_raise(self):
+
+        model = FakeModelB(uid=1, name="foo")
+
+        with self.assertRaises(exceptions.FieldBadValue):
+            model.save(name=1)
+
+    def test_CASE_save_WITH_bad_values_for_field_ON_unexisted_object_SHOULD_raise(self):
+
+        model = FakeModelB(name="foo") # uid set to 0
+
+        with self.assertRaises(exceptions.FieldBadValue):
+            model.save(name=1)
 
     def test_CASE_delete_SHOULD_delete(self):
         # TODO

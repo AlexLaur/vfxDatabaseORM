@@ -125,15 +125,13 @@ class TestAttributeDescriptor(unittest.TestCase):
     def test_CASE_set_on_instantiated_class_WITH_same_data_SHOULD_not_set(self):
         fake_model = FakeModel1(uid=5, code="foo")
 
-        # TODO
+        self.assertEqual(fake_model.code, "foo")
+        self.assertEqual(len(fake_model._changed), 0)
 
-        # self.assertEqual(fake_model.code, "foo")
-        # self.assertEqual(len(fake_model._changed), 0)
+        fake_model.code = "foo"
 
-        # fake_model.code = "foo"
-
-        # self.assertEqual(fake_model.code, "foo")
-        # self.assertEqual(len(fake_model._changed), 0)
+        self.assertEqual(fake_model.code, "foo")
+        self.assertEqual(len(fake_model._changed), 0)
 
     def test_CASE_set_on_instantiated_class_WITH_read_only_field_SHOULD_raise(
         self,
