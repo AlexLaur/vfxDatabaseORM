@@ -163,43 +163,23 @@ class Model(object):
         self._initialized = True
 
     def save(self, **kwargs):
+        # Set attributes
+        self._set_attributes_from_kwargs(kwargs)
+
         # No uid, create the entity on the database
         if not self.uid:
             # TODO and what happen if we supercharge uid field with default to -1 ?
-            fields = self.get_fields()
-            field_names = [field.name for field in fields]
-
-            for key, value in kwargs.items():
-                if key not in field_names:
-                    # An unknow attribute has been given here...
-                    continue
-                setattr(self, key, value)
-
             # Need to create the entity
             self.__class__.objects.create(self)
             # Reset changed fields
             self._changed = []
             return True
 
-        if not self._changed and not kwargs:
+        if not self._changed:
             # Nothing has changed, nothing to update
             return False
 
-        # 1. Loop through kwargs and update Model properties
-        fields = self.get_fields()
-        field_names = [field.name for field in fields]
-
-        for key, value in kwargs.items():
-            if key not in field_names:
-                # An unknow attribute has been given here...
-                continue
-            setattr(self, key, value)
-
-        # We set all given kwargs, now check if kwargs updated somthing
-        if not self._changed:
-            return False
-
-        # 2. Update the model on the database
+        # Update the model on the database
         self.__class__.objects.update(self)
 
         # Reset changed fields
@@ -272,6 +252,21 @@ class Model(object):
                 name=field_name
             )
         )
+
+    def _set_attributes_from_kwargs(self, kwargs):
+        """From given kwargs, set attributes on this instance.
+
+        :param kwargs: Attributes to set
+        :type kwargs: dict
+        """
+        fields = self.get_fields()
+        field_names = [field.name for field in fields]
+
+        for key, value in kwargs.items():
+            if key not in field_names:
+                # An unknow attribute has been given here...
+                continue
+            setattr(self, key, value)
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
