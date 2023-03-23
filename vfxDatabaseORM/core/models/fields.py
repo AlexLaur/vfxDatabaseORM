@@ -135,9 +135,7 @@ class BaseField(object):
             field_name = args[0]
         else:
             # More than tree level, it is not supported yet
-            raise exceptions.InvalidLookUp(
-                "Only first deph lookup works."
-            )
+            raise exceptions.InvalidLookUp("Only first deph lookup works.")
 
         if field_name != self.name:
             # This field is seems not be the right field
@@ -177,8 +175,7 @@ class BaseField(object):
 
     def __repr__(self):
         return "<{cls_name} '{name}'>".format(
-            cls_name=self.__class__.__name__,
-            name=self.name,
+            cls_name=self.__class__.__name__, name=self.name
         )
 
 
@@ -295,10 +292,7 @@ class FloatField(Field):
 class BooleanField(Field):
     """A Field which implements a Boolean"""
 
-    LOOKUPS = [
-        LOOKUPS.EQUAL,
-        LOOKUPS.NOT_EQUAL,
-    ]
+    LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL]
 
     def check_value(self, value):
         if not isinstance(value, bool):
@@ -309,12 +303,7 @@ class BooleanField(Field):
 class ListField(Field):
     """A Field which implements a List"""
 
-    LOOKUPS = [
-        LOOKUPS.EQUAL,
-        LOOKUPS.NOT_EQUAL,
-        LOOKUPS.IN,
-        LOOKUPS.NOT_IN,
-    ]
+    LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL, LOOKUPS.IN, LOOKUPS.NOT_IN]
 
     def check_value(self, value):
         if not isinstance(value, (list, tuple)):

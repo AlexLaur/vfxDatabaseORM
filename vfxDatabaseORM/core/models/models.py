@@ -275,6 +275,5 @@ class Model(object):
 
     def __repr__(self):
         return "<{cls_name} uid={entity_id}>".format(
-            cls_name=self.__class__.__name__,
-            entity_id=self.uid,
+            cls_name=self.__class__.__name__, entity_id=self.uid
         )

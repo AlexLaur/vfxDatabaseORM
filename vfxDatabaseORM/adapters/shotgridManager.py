@@ -149,10 +149,15 @@ class ShotgridManager(IManager):
         return result
 
     def update(self, instance):
-        new_data = {field.db_name: getattr(instance, field.name) for field in instance._changed}
+        new_data = {
+            field.db_name: getattr(instance, field.name)
+            for field in instance._changed
+        }
         if not new_data:
             return
-        self._SG_CLIENT.update(self.model_class.entity_name, instance.uid, new_data)
+        self._SG_CLIENT.update(
+            self.model_class.entity_name, instance.uid, new_data
+        )
 
     def create(self, instance):
         raise NotImplementedError()

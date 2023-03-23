@@ -4,6 +4,7 @@ from vfxDatabaseORM.core import models, exceptions
 from vfxDatabaseORM.core.models.fields import RelatedField
 from vfxDatabaseORM.core.interfaces import IManager
 
+
 class FakeBadRelatedField(RelatedField):
     is_many_to_many = False
     is_one_to_many = False
@@ -122,7 +123,9 @@ class TestAttributeDescriptor(unittest.TestCase):
         self.assertEqual(fake_model.code, "bar")
         self.assertEqual(len(fake_model._changed), 1)
 
-    def test_CASE_set_on_instantiated_class_WITH_same_data_SHOULD_not_set(self):
+    def test_CASE_set_on_instantiated_class_WITH_same_data_SHOULD_not_set(
+        self,
+    ):
         fake_model = FakeModel1(uid=5, code="foo")
 
         self.assertEqual(fake_model.code, "foo")

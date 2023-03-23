@@ -151,6 +151,7 @@ class TestField(unittest.TestCase):
         with self.assertRaises(exceptions.InvalidLookUp):
             field.compute_lookup("foo__bar__is")
 
+
 class TestRelatedField(unittest.TestCase):
     def test_CASE_attributes_SHOULD_return_attributes(self):
         field = RelatedField(
