@@ -170,7 +170,7 @@ class Model(object):
         if not self.uid:
             # TODO and what happen if we supercharge uid field with default to -1 ?
             # Need to create the entity
-            new_instance = self.__class__.objects.create(self)
+            new_instance = self.__class__.objects.insert(self)
             # Update attributes of this instance with the new instance
             self._initialized = False
             for field in self.get_fields():

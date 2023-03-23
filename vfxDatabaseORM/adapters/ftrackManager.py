@@ -30,7 +30,10 @@ class FTrackManager(IManager):
     def filters(self, **kwargs):
         raise NotImplementedError()
 
-    def create(self, instance):
+    def create(self, **kwargs):
+        raise NotImplementedError()
+
+    def insert(self, instance):
         raise NotImplementedError()
 
     def update(self, instance):

@@ -38,7 +38,10 @@ class FakeManager(IManager):
             return []
         return [self.model_class(uid=i) for i in range(2)]
 
-    def create(self, isntance):
+    def create(self, **kwargs):
+        return self.model_class(uid=1)
+
+    def insert(self, isntance):
         return self.model_class(uid=1)
 
     def update(self, isntance):

@@ -165,8 +165,19 @@ class ShotgridManager(IManager):
             self.model_class.entity_name, instance.uid, new_data
         )
 
-    def create(self, instance):
-        """Create the entity on Shotgrid
+    def create(self, **kwargs):
+        """From given arguments, create an entity in the database and return
+        the instance.
+
+        :return: The created entity
+        :rtype: vfxDatabaseORM.core.models.Model
+        """
+        instance = self.model_class(**kwargs)
+        new_instance = self.insert(instance)
+        return new_instance
+
+    def insert(self, instance):
+        """Insert the entity on Shotgrid
 
         :param instance: The instance to create
         :type instance: vfxDatabaseORM.core.models.Model

@@ -20,7 +20,11 @@ class IManager(ABC):
         pass
 
     @abc.abstractmethod
-    def create(self, instance):
+    def create(self, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def insert(self, instance):
         pass
 
     @abc.abstractmethod

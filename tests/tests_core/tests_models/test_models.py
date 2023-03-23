@@ -6,7 +6,7 @@ from vfxDatabaseORM.core.interfaces import IManager
 
 class FakeManager(IManager):
     update_was_called = False
-    create_was_called = False
+    insert_was_called = False
 
     def get(self, uid):
         return self.model_class(uid=1)
@@ -17,8 +17,11 @@ class FakeManager(IManager):
     def filters(self, **kwargs):
         return [self.model_class(uid=i) for i in range(2)]
 
-    def create(self, instance):
-        FakeManager.create_was_called = True
+    def create(self, **kwargs):
+        return self.model_class(uid=1)
+
+    def insert(self, instance):
+        FakeManager.insert_was_called = True
         return self.model_class(uid=1)
 
     def update(self, instance):
@@ -46,7 +49,7 @@ class FakeModelB(models.Model):
 class TestModel(unittest.TestCase):
     def tearDown(self):
         FakeManager.update_was_called = False
-        FakeManager.create_was_called = False
+        FakeManager.insert_was_called = False
 
     def test_CASE_model_without_manager_SHOULD_raise(self):
         with self.assertRaises(exceptions.ManagerNotDefined):
@@ -143,7 +146,7 @@ class TestModel(unittest.TestCase):
         result = model.save(whatever="bar")
         self.assertFalse(result)
         self.assertFalse(FakeModelB.objects.update_was_called)
-        self.assertFalse(FakeModelB.objects.create_was_called)
+        self.assertFalse(FakeModelB.objects.insert_was_called)
 
     def test_CASE_save_WITH_changed_values_ON_new_object_SHOULD_not_create(
         self,
@@ -153,7 +156,7 @@ class TestModel(unittest.TestCase):
         result = model.save()
         self.assertTrue(result)
         self.assertFalse(FakeModelB.objects.update_was_called)
-        self.assertTrue(FakeModelB.objects.create_was_called)
+        self.assertTrue(FakeModelB.objects.insert_was_called)
 
     def test_CASE_save_WITH_bad_values_for_field_ON_existed_object_SHOULD_raise(
         self,
