@@ -19,7 +19,7 @@ class FakeManager(IManager):
 
     def create(self, instance):
         FakeManager.create_was_called = True
-        return True
+        return self.model_class(uid=1)
 
     def update(self, instance):
         FakeManager.update_was_called = True

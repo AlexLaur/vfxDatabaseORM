@@ -235,6 +235,8 @@ class IntegerField(Field):
     ]
 
     def check_value(self, value):
+        if value == self.default:
+            return True
         if not isinstance(value, int):
             return False
         return super(IntegerField, self).check_value(value)
@@ -263,6 +265,8 @@ class StringField(Field):
         return self._max_width
 
     def check_value(self, value):
+        if value == self.default:
+            return True
         if not isinstance(value, six.string_types):
             return False
         if self._max_width:
@@ -284,6 +288,8 @@ class FloatField(Field):
     ]
 
     def check_value(self, value):
+        if value == self.default:
+            return True
         if not isinstance(value, float):
             return False
         return super(FloatField, self).check_value(value)
@@ -294,9 +300,14 @@ class BooleanField(Field):
 
     LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL]
 
+    def __init__(self, db_name, default=False, **kwargs):
+        super(BooleanField, self).__init__(db_name, default=default, **kwargs)
+
     def check_value(self, value):
         if not isinstance(value, bool):
             return False
+        if value == self.default:
+            return True
         return super(BooleanField, self).check_value(value)
 
 
@@ -306,6 +317,8 @@ class ListField(Field):
     LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL, LOOKUPS.IN, LOOKUPS.NOT_IN]
 
     def check_value(self, value):
+        if value == self.default:
+            return True
         if not isinstance(value, (list, tuple)):
             return False
         return super(ListField, self).check_value(value)
@@ -329,6 +342,8 @@ class DateTimeField(Field):
         )
 
     def check_value(self, value):
+        if value == self.default:
+            return True
         if not isinstance(value, datetime.datetime):
             return False
         return super(DateTimeField, self).check_value(value)
@@ -352,6 +367,8 @@ class DateField(Field):
         )
 
     def check_value(self, value):
+        if value == self.default:
+            return True
         if not isinstance(value, datetime.date):
             return False
         return super(DateField, self).check_value(value)

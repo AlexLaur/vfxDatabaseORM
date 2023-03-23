@@ -195,7 +195,7 @@ class TestIntegerField(unittest.TestCase):
         field = IntegerField("uid")
 
         self.assertFalse(field.check_value("1"))
-        self.assertFalse(field.check_value(None))
+        self.assertTrue(field.check_value(None))  # default value is allowed
 
 
 class TestStringField(unittest.TestCase):
@@ -212,7 +212,7 @@ class TestStringField(unittest.TestCase):
         field = StringField("uid", max_width=10)
 
         self.assertFalse(field.check_value(1))
-        self.assertFalse(field.check_value(None))
+        self.assertTrue(field.check_value(None))  # default value is allowed
         self.assertFalse(field.check_value("abcdefghijkl"))  # > 10 chars
 
 
@@ -224,8 +224,8 @@ class TestFloatField(unittest.TestCase):
     def test_CASE_check_value_WITH_invalid_data_SHOULD_return_false(self):
         field = FloatField("range")
 
+        self.assertTrue(field.check_value(None))  # default value is allowed
         self.assertFalse(field.check_value(1))
-        self.assertFalse(field.check_value(None))
         self.assertFalse(field.check_value("1.0"))  # > 10 chars
 
 
@@ -254,7 +254,7 @@ class TestListField(unittest.TestCase):
         field = ListField("values")
 
         self.assertFalse(field.check_value("True"))
-        self.assertFalse(field.check_value(None))
+        self.assertTrue(field.check_value(None))  # default value is allowed
         self.assertFalse(field.check_value(0))
         self.assertFalse(field.check_value({}))
 

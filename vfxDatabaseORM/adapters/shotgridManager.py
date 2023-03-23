@@ -149,18 +149,51 @@ class ShotgridManager(IManager):
         return result
 
     def update(self, instance):
+        """Update the given instance into ShotGrid
+
+        :param instance: The instance to update
+        :type instance: vfxDatabaseORM.core.models.Model
+        """
         new_data = {
             field.db_name: getattr(instance, field.name)
             for field in instance._changed
         }
         if not new_data:
             return
+
         self._SG_CLIENT.update(
             self.model_class.entity_name, instance.uid, new_data
         )
 
     def create(self, instance):
-        raise NotImplementedError()
+        """Create the entity on Shotgrid
+
+        :param instance: The instance to create
+        :type instance: vfxDatabaseORM.core.models.Model
+        :return: A new instance
+        :rtype: vfxDatabaseORM.core.models.Model
+        """
+        fields = self.model_class.get_fields()
+        non_read_only_fields = [
+            field for field in fields if not field.read_only
+        ]
+
+        new_data = {
+            field.db_name: getattr(instance, field.name)
+            for field in non_read_only_fields
+        }
+        if not new_data:
+            return instance
+
+        field_names = [f.db_name for f in self.model_class.get_fields()]
+
+        query_data = self._SG_CLIENT.create(
+            self.model_class.entity_name, new_data, field_names
+        )
+
+        new_instance = ModelFactory.build(self.model_class, query_data)
+
+        return new_instance
 
     def delete(self):
         raise NotImplementedError()

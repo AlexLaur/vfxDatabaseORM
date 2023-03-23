@@ -39,7 +39,7 @@ class FakeManager(IManager):
         return [self.model_class(uid=i) for i in range(2)]
 
     def create(self, isntance):
-        return True
+        return self.model_class(uid=1)
 
     def update(self, isntance):
         return True
