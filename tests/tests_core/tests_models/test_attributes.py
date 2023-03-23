@@ -37,10 +37,10 @@ class FakeManager(IManager):
             return []
         return [self.model_class(uid=i) for i in range(2)]
 
-    def create(self, data):
+    def create(self, isntance):
         return True
 
-    def update(self, uid, new_data):
+    def update(self, isntance):
         return True
 
     def delete(self):
@@ -121,6 +121,19 @@ class TestAttributeDescriptor(unittest.TestCase):
 
         self.assertEqual(fake_model.code, "bar")
         self.assertEqual(len(fake_model._changed), 1)
+
+    def test_CASE_set_on_instantiated_class_WITH_same_data_SHOULD_not_set(self):
+        fake_model = FakeModel1(uid=5, code="foo")
+
+        # TODO
+
+        # self.assertEqual(fake_model.code, "foo")
+        # self.assertEqual(len(fake_model._changed), 0)
+
+        # fake_model.code = "foo"
+
+        # self.assertEqual(fake_model.code, "foo")
+        # self.assertEqual(len(fake_model._changed), 0)
 
     def test_CASE_set_on_instantiated_class_WITH_read_only_field_SHOULD_raise(
         self,

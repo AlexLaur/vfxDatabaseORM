@@ -14,10 +14,10 @@ class FakeManager(IManager):
     def filters(self, **kwargs):
         return [self.model_class(uid=i) for i in range(2)]
 
-    def create(self, data):
+    def create(self, instance):
         return True
 
-    def update(self, uid, new_data):
+    def update(self, instance):
         return True
 
     def delete(self):

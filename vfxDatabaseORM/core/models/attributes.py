@@ -116,6 +116,10 @@ class AttributeDescriptor(object):
                 )
             )
 
+        if getattr(instance, self._field.name) == value:
+            # It is the same value, no change to perform
+            return
+
         # The field has been changed, mark it as changed.
         if self._field not in instance._changed:
             instance._changed.append(self._field)
