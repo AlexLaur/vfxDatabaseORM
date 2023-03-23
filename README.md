@@ -126,9 +126,45 @@ Examples of `Delete` operations.
 project.delete()  # Delete the project in the database
 ```
 
+# Serializers
+
+By default, each `Model` has a JSON serializer.
+Some serializers are defined in `vfxDatabaseORM.core.serializers`.
+
+- JSONSerializer
+- PickleSerializer
+
+```python
+class Project(models.Model):
+    manager_class = MyCustomManager
+
+    uid = models.IntegerField("id", read_only=True)
+    code = models.StringField("code")
+
+
+project = Project(uid=50, code="foo")
+
+# Serialize
+data = Project.serializer.serialize(project)  # {"uid": 50, "code": "foo"}
+
+# De-Serialize
+new_instance = Project.serializer.deserialize(data)
+
+assert project == new_instance
+```
+
+You can override the serializer with the attribute `serializer_class`.
+```python
+class Project(models.Model):
+    manager_class = MyCustomManager
+    serialize_class = MyCustomSerializer
+
+    uid = models.IntegerField("id", read_only=True)
+    code = models.StringField("code")
+```
+
 # TODO
 - Add other adapters (Ftrack, Kitsu, DBs)
-- Add serializers to serialize a model instance
 - Add the update for related fields
 
 # Run coverage and tests

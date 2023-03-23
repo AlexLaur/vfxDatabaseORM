@@ -30,13 +30,15 @@ from vfxDatabaseORM.core.models.graph import Graph
 from vfxDatabaseORM.core.models.options import Options
 from vfxDatabaseORM.core.models.attributes import AttributeDescriptor
 from vfxDatabaseORM.core.models.fields import Field, RelatedField, IntegerField
-from vfxDatabaseORM.core.interfaces import IManager
+from vfxDatabaseORM.core.serializers import JSONSerializer
+from vfxDatabaseORM.core.interfaces import IManager, ISerializer
 
 
 class BaseModel(type):
     """Metaclass for all models"""
 
     manager_class = IManager
+    serializer_class = ISerializer
     uid_key = constants.UID_KEY
 
     _graph = None  # Singleton Graph
@@ -152,6 +154,10 @@ class BaseModel(type):
         """
         return cls._get_manager()
 
+    @property
+    def serializer(cls):
+        return cls._get_serializer()
+
     def _get_manager(cls):
         """Get the manager of the model.
 
@@ -160,10 +166,14 @@ class BaseModel(type):
         """
         return cls.manager_class(model_class=cls)
 
+    def _get_serializer(cls):
+        return cls.serializer_class(model_class=cls)
+
 
 @six.add_metaclass(BaseModel)
 class Model(object):
     entity_name = ""
+    serializer_class = JSONSerializer
 
     # Default field to identify an entity in a database
     uid = IntegerField("id", read_only=True, default=0)

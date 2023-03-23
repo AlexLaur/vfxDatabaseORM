@@ -22,5 +22,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .manager import IManager  # noqa
-from .serializer import ISerializer  # noqa
+from .jsonSerializer import JSONSerializer  # noqa
+from .pickleSerializer import PickleSerializer  # noqa

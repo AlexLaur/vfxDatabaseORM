@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# - __init__.py -
+# - serializer.py -
 #
 # Copyright (c) 2022-2023 Alexandre Laurette
 #
@@ -22,5 +22,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .manager import IManager  # noqa
-from .serializer import ISerializer  # noqa
+import abc
+
+ABC = abc.ABCMeta("ABC", (object,), {})
+
+
+class ISerializer(ABC):
+    def __init__(self, model_class):
+        self.model_class = model_class
+
+    @abc.abstractmethod
+    def serialize(cls, model):
+        pass
+
+    @abc.abstractmethod
+    def deserialize(cls, data):
+        pass

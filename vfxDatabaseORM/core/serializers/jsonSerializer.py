@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# - __init__.py -
+# - jsonSerializer.py -
 #
 # Copyright (c) 2022-2023 Alexandre Laurette
 #
@@ -22,5 +22,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .manager import IManager  # noqa
-from .serializer import ISerializer  # noqa
+from vfxDatabaseORM.core.interfaces import ISerializer
+
+
+class JSONSerializer(ISerializer):
+    def serialize(self, instance):
+        data = {}
+        for field in self.model_class.get_fields():
+            data[field.name] = getattr(instance, field.name)
+        return data
+
+    def deserialize(self, data):
+        return self.model_class(**data)
