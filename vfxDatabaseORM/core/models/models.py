@@ -1,31 +1,44 @@
 import six
 
-from vfxDatabaseORM.src.domain import exceptions
-from vfxDatabaseORM.src.domain.models import constants
-from vfxDatabaseORM.src.domain.models.fields import (
-    Field,
-    RelatedField,
-    IntegerField,
-)
-from vfxDatabaseORM.src.domain.models.options import Options
-from vfxDatabaseORM.src.domain.models.attributes import AttributeDescriptor
-
-from vfxDatabaseORM.src.domain.ports import AbstractManager
+from vfxDatabaseORM.core import exceptions
+from vfxDatabaseORM.core.models import constants
+from vfxDatabaseORM.core.models.graph import Graph
+from vfxDatabaseORM.core.models.options import Options
+from vfxDatabaseORM.core.models.attributes import AttributeDescriptor
+from vfxDatabaseORM.core.models.fields import Field, RelatedField, IntegerField
+from vfxDatabaseORM.core.interfaces import IManager
 
 
 class BaseModel(type):
     """Metaclass for all models"""
 
-    manager_class = AbstractManager
+    manager_class = IManager
     uid_key = constants.UID_KEY
 
+    _graph = None  # Singleton Graph
+
     def __new__(cls, name, bases, attrs, **kwargs):
+        # Initialize the graph for all futures entities and links
+        if not cls._graph:
+            cls._graph = Graph()
 
         # Also insure initialization is only performed for subclasses of Model
         # (excluding Model class itself)
         parents = [b for b in bases if isinstance(b, BaseModel)]
         if not parents:
             return super(BaseModel, cls).__new__(cls, name, bases, attrs)
+
+        # Do small checks
+        manager_class = attrs.get("manager_class", None)
+        if not manager_class:
+            raise exceptions.ManagerNotDefined(
+                "No Manager defined. "
+                "Add a manager to the model through the attribute "
+                "'manager_class'."
+            )
+
+        # Add the a new node to the graph
+        cls._graph.add_node(name)
 
         # Inject uid field if it doesn't exist
         if cls.uid_key not in attrs:
@@ -51,7 +64,6 @@ class BaseModel(type):
         options = Options()
 
         for attr_name, attr_value in attrs.items():
-
             if not isinstance(attr_value, (Field, RelatedField)):
                 continue
 
@@ -69,21 +81,43 @@ class BaseModel(type):
                 # Create private attribute
                 new_attrs["_{}".format(attr_name)] = field.default
 
-                # Create and set descriptors for basic fields
-                attr_descriptor = AttributeDescriptor(field=field)
-                new_attrs[attr_name] = attr_descriptor
-
                 # Register field in options
                 options.add_field(field)
 
             if isinstance(attr_value, RelatedField):
+                # Register field in options
                 options.add_related_field(field)
+                # Connect nodes together, If the field.to node is not created
+                # it will be created.
+                cls._graph.connect_nodes(name, field.to, field.name)
+
+            # Create and set descriptors for basic fields
+            attr_descriptor = AttributeDescriptor(field=field)
+            new_attrs[attr_name] = attr_descriptor
 
         new_attrs["_meta"] = options
         new_attrs["_initialized"] = False
         new_attrs["_changed"] = []
+        new_attrs["_graph"] = cls._graph
 
-        return super(BaseModel, cls).__new__(cls, name, bases, new_attrs)
+        new_class = super(BaseModel, cls).__new__(cls, name, bases, new_attrs)
+
+        # Class created, register some informations in the corresponding node
+        new_class._graph.add_attribute_to_node(
+            node_name=name, attribute_name="model", attribute_value=new_class
+        )
+        new_class._graph.add_attribute_to_node(
+            node_name=name,
+            attribute_name="attributes",
+            attribute_value=[f.name for f in options.fields],
+        )
+        new_class._graph.add_attribute_to_node(
+            node_name=name,
+            attribute_name="related_attributes",
+            attribute_value=[f.name for f in options.related_fields],
+        )
+
+        return new_class
 
     @property
     def objects(cls):
@@ -105,7 +139,6 @@ class BaseModel(type):
 
 @six.add_metaclass(BaseModel)
 class Model(object):
-
     entity_name = ""
 
     # Default field to identify an entity in a database
@@ -115,7 +148,9 @@ class Model(object):
         """Constructor of the Model.
         Each given attribute is set of the corresponding field.
         """
-        # Initialize fields in the model
+        # Init changed to an empty list
+        self._changed = []
+
         fields = self.get_fields()
         field_names = [field.name for field in fields]
 
@@ -128,44 +163,36 @@ class Model(object):
         self._initialized = True
 
     def save(self, **kwargs):
-        """Save changes on this model instance into the database"""
-
-        if not self._changed and not kwargs:
-            # Nothing has change, nothing to update
-            return
+        # Set attributes
+        self._set_attributes_from_kwargs(kwargs)
 
         # No uid, create the entity on the database
         if not self.uid:
+            # TODO and what happen if we supercharge uid field with default to -1 ?
             # Need to create the entity
-            # self.__class__.objects.insert({})
-            return
+            new_instance = self.__class__.objects.insert(self)
+            # Update attributes of this instance with the new instance
+            self._initialized = False
+            for field in self.get_fields():
+                setattr(self, field.name, getattr(new_instance, field.name))
+            self._initialized = True
+            # Reset changed fields
+            self._changed = []
+            return True
 
-        # 1. Loop through kwargs and update Model properties
-        fields = self.get_fields()
-        field_names = [field.name for field in fields]
+        if not self._changed:
+            # Nothing has changed, nothing to update
+            return False
 
-        for key, value in kwargs.items():
-            if key not in field_names:
-                # An unknow attribute has been given here...
-                continue
-            setattr(self, key, value)
+        # Update the model on the database
+        self.__class__.objects.update(self)
 
-        # 2. Collect all updated fields
-        raw_new_data = {}
-
-        for field in self._changed:
-            raw_new_data[field.db_name] = getattr(self, field.name)
-
-        # 3. Update the model on the database
-        self.__class__.objects.update(self.uid, raw_new_data)
-
+        # Reset changed fields
         self._changed = []
 
-    def delete(self):
-        """Delete this Model instance from the database.
+        return True
 
-        :raises NotImplementedError: _description_
-        """
+    def delete(self):
         raise NotImplementedError()
 
     @classmethod
@@ -185,6 +212,18 @@ class Model(object):
         :rtype: list
         """
         return cls._meta.related_fields
+
+    @classmethod
+    def get_all_fields(cls):
+        """Get all fields (classic and related) of the Model.
+
+        :return: List of all fields
+        :rtype: list
+        """
+        fields = []
+        fields.extend(cls._meta.fields)
+        fields.extend(cls._meta.related_fields)
+        return fields
 
     @classmethod
     def get_field(cls, field_name):
@@ -214,10 +253,32 @@ class Model(object):
             if field.name == field_name:
                 return field
         raise exceptions.FieldNotFound(
-            "Field '{name}' isn't setted on the Model.".format(name=field_name)
+            "This Model doesn't have a Field named '{name}'.".format(
+                name=field_name
+            )
         )
 
+    def _set_attributes_from_kwargs(self, kwargs):
+        """From given kwargs, set attributes on this instance.
+
+        :param kwargs: Attributes to set
+        :type kwargs: dict
+        """
+        fields = self.get_fields()
+        field_names = [field.name for field in fields]
+
+        for key, value in kwargs.items():
+            if key not in field_names:
+                # An unknow attribute has been given here...
+                continue
+            setattr(self, key, value)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.uid == other.uid
+
     def __repr__(self):
-        return "<{cls_name} type={entity_type}>".format(
-            cls_name=self.__class__.__name__, entity_type=self.entity_name
+        return "<{cls_name} uid={entity_id}>".format(
+            cls_name=self.__class__.__name__, entity_id=self.uid
         )

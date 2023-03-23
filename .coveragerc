@@ -1,0 +1,11 @@
+[run]
+omit =
+    # omit all files tests
+    */tests/*
+
+[report]
+exclude_lines =
+    # Skip any pass lines as may be used with @abstractmethod
+    pass
+    # Skip methods __repr__
+    def __repr__

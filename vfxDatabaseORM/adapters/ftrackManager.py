@@ -1,11 +1,10 @@
 import ftrack_api
 
-from vfxDatabaseORM.src.domain.ports import AbstractManager
-from vfxDatabaseORM.src.domain.factories import ModelFactory
+from vfxDatabaseORM.core.interfaces import IManager
+from vfxDatabaseORM.core.factories import ModelFactory
 
 
-class FTrackManagerAdapter(AbstractManager):
-
+class FTrackManager(IManager):
     HOST = ""
     API_NAME = ""
     API_KEY = ""
@@ -13,7 +12,7 @@ class FTrackManagerAdapter(AbstractManager):
     _SESSION = None
 
     def __init__(self, model_class):
-        super(FTrackManagerAdapter, self).__init__(model_class)
+        super(FTrackManager, self).__init__(model_class)
 
         if not self._SESSION:
             self._SESSION = ftrack_api.Session(
@@ -31,10 +30,13 @@ class FTrackManagerAdapter(AbstractManager):
     def filters(self, **kwargs):
         raise NotImplementedError()
 
-    def create(self, data):
+    def create(self, **kwargs):
         raise NotImplementedError()
 
-    def update(self, uid, new_data):
+    def insert(self, instance):
+        raise NotImplementedError()
+
+    def update(self, instance):
         raise NotImplementedError()
 
     def delete(self):
