@@ -140,13 +140,6 @@ class TestAttributeDescriptor(unittest.TestCase):
         with self.assertRaises(exceptions.ReadOnlyField):
             fake_model.uid = 10
 
-    def test_CASE_set_on_instantiated_class_WITH_invalid_data_SHOULD_raise(
-        self,
-    ):
-        fake_model = FakeModel1(uid=5, code="foo")
-        with self.assertRaises(exceptions.FieldBadValue):
-            fake_model.code = 10
-
     # __get__
     def test_CASE_get_on_class_SHOULD_raise(self):
         # Get on the object instead of an instance

@@ -53,11 +53,13 @@ class TestModel(unittest.TestCase):
             class BadModelWithNoManager(models.Model):
                 pass
 
+    # get_fields() tests
     def test_CASE_get_fields_SHOULD_return_fields(self):
 
         result = FakeModelA.get_fields()
         self.assertEqual(result, FakeModelA._meta.fields)
 
+    # get_related_fields() tests
     def test_CASE_get_related_fields_SHOULD_return_fields(self):
 
         result = FakeModelA.get_related_fields()
@@ -68,6 +70,7 @@ class TestModel(unittest.TestCase):
         result = FakeModelA.get_related_fields()
         self.assertEqual(result, FakeModelA._meta.related_fields)
 
+    # get_field() tests
     def test_CASE_get_field_by_name_WITH_valid_field_SHOULD_return_field(self):
 
         result = FakeModelA.get_field("uid")
@@ -83,6 +86,7 @@ class TestModel(unittest.TestCase):
         with self.assertRaises(exceptions.FieldNotFound):
             FakeModelA.get_field("nothing")
 
+    # get_all_fields() tests
     def test_CASE_get_all_fields_SHOULD_return_all_fields(self):
 
         result = FakeModelB.get_all_fields()
@@ -93,6 +97,7 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
+    # __eq__ tests
     def test_CASE_equal_SHOULD_return_bool(self):
 
         model_a_0 = FakeModelA(uid=5)
@@ -108,6 +113,7 @@ class TestModel(unittest.TestCase):
 
         self.assertFalse(model_a_0 == model_b_0)
 
+    # save() tests
     def test_CASE_save_WITH_unchanged_values_SHOULD_not_save(self):
 
         model = FakeModelB(uid=1, name="foo")
@@ -170,6 +176,7 @@ class TestModel(unittest.TestCase):
         with self.assertRaises(exceptions.FieldBadValue):
             model.save(name=1)
 
+    # delete() tests
     def test_CASE_delete_SHOULD_delete(self):
         # TODO
         with self.assertRaises(NotImplementedError):
