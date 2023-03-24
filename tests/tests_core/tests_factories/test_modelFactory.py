@@ -25,32 +25,11 @@
 import unittest
 
 from vfxDatabaseORM.core import models
-from vfxDatabaseORM.core.interfaces import IManager
 from vfxDatabaseORM.core.factories import ModelFactory
 
 
-class FakeManager(IManager):
-    def get(self, uid):
-        return None
-
-    def all(self):
-        return []
-
-    def filters(self, **kwargs):
-        return []
-
-    def create(self, data):
-        return True
-
-    def update(self, uid, new_data):
-        return True
-
-    def delete(self):
-        return True
-
-
 class ExampleModel(models.Model):
-    manager_class = FakeManager
+    manager_class = type("FakeManager", (object,), {})
 
     name = models.StringField("name")
     is_valid = models.BooleanField("foo_is_valid", default=False)
