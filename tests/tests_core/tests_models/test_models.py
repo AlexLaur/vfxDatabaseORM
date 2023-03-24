@@ -52,7 +52,7 @@ class FakeManager(IManager):
         FakeManager.update_was_called = True
         return True
 
-    def delete(self):
+    def delete(self, instance):
         return True
 
 

@@ -157,7 +157,7 @@ You can override the serializer with the attribute `serializer_class`.
 ```python
 class Project(models.Model):
     manager_class = MyCustomManager
-    serialize_class = MyCustomSerializer
+    serializer_class = MyCustomSerializer
 
     uid = models.IntegerField("id", read_only=True)
     code = models.StringField("code")
@@ -166,6 +166,7 @@ class Project(models.Model):
 # TODO
 - Add other adapters (Ftrack, Kitsu, DBs)
 - Add the update for related fields
+- Serialize in depth ?
 
 # Run coverage and tests
 Unit tests:

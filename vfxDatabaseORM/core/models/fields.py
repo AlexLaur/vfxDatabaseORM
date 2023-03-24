@@ -158,7 +158,7 @@ class BaseField(object):
             # classic field without lookup
             field_name = args[0]
         else:
-            # More than tree level, it is not supported yet
+            # More than three level, it is not supported yet
             raise exceptions.InvalidLookUp("Only first deph lookup works.")
 
         if field_name != self.name:
@@ -238,10 +238,20 @@ class RelatedField(BaseField):
 
     @property
     def to(self):
+        """The destination object for this related field.
+
+        :return: The name of the destination Model
+        :rtype: str
+        """
         return self._to
 
     @property
     def related_db_name(self):
+        """The name of the related field in the database.
+
+        :return: The name in the database of the related field
+        :rtype: str
+        """
         return self._related_db_name
 
 
@@ -286,6 +296,11 @@ class StringField(Field):
 
     @property
     def max_width(self):
+        """Get the max width allowed for the value of this field
+
+        :return: The max width
+        :rtype: int
+        """
         return self._max_width
 
     def check_value(self, value):

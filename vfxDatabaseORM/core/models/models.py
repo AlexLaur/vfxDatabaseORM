@@ -197,6 +197,11 @@ class Model(object):
         self._initialized = True
 
     def save(self, **kwargs):
+        """Save the model into the database.
+
+        :return: True if the model has been saved, False otherwise
+        :rtype: bool
+        """
         # Set attributes
         self._set_attributes_from_kwargs(kwargs)
 
