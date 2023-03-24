@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# - __init__.py -
+# - test_pickleSerializer.py -
 #
 # Copyright (c) 2022-2023 Alexandre Laurette
 #
@@ -22,5 +22,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .manager import IManager  # noqa
-from .serializer import ISerializer  # noqa
+import unittest
+
+from vfxDatabaseORM.core import models
+from vfxDatabaseORM.core.serializers import PickleSerializer
+
+
+class FakeModelA(models.Model):
+    manager_class = type("FakeManager", (object,), {})
+    serializer_class = PickleSerializer
+
+    name = models.StringField("name")
+
+
+class TestPickleSerializer(unittest.TestCase):
+    def test_CASE_serialize_deserialize_SHOULD_be_equals(self):
+        instance = FakeModelA(uid=50, name="foo")
+
+        data = FakeModelA.serializer.serialize(instance)
+
+        new_instance = FakeModelA.serializer.deserialize(data)
+
+        self.assertEqual(instance, new_instance)

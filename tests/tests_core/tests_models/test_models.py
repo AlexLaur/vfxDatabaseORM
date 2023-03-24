@@ -204,3 +204,20 @@ class TestModel(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             model = FakeModelA(uid=5)
             model.delete()
+
+    # serializer tests
+    def test_CASE_serializer_SHOULD_serialize(self):
+        model = FakeModelB(uid=50, name="foo")
+
+        result = FakeModelB.serializer.serialize(model)
+
+        self.assertEqual(result, {"uid": 50, "name": "foo"})
+
+    def test_CASE_serializer_SHOULD_deserialize(self):
+        model = FakeModelB(uid=50, name="foo")
+
+        data = {"uid": 50, "name": "foo"}
+
+        new_instance = FakeModelB.serializer.deserialize(data)
+
+        self.assertEqual(model, new_instance)
