@@ -168,6 +168,14 @@ class Project(models.Model):
 - Add the update for related fields
 - Serialize in depth ?
 
+
+# Build the doc
+```bash
+cd docs/
+./make.bat html  # On Windows
+make html  # On UNIX
+```
+
 # Run coverage and tests
 Unit tests:
 ```bash

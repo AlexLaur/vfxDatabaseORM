@@ -57,7 +57,7 @@ class BaseField(object):
         :param description: The description of this field, defaults to None
         :type description: str, optional
         :param default: The default value for this field, defaults to None
-        :type default: _type_, optional
+        :type default: any, optional
         :param read_only: Is a read only field ?, defaults to False
         :type read_only: bool, optional
         """
@@ -192,6 +192,7 @@ class BaseField(object):
         """Check the value for this field
 
         :param value: The value to check
+        :type value: any
         :return: True if the value is conform for this field, False otherwise.
         :rtype: bool
         """
@@ -231,6 +232,15 @@ class RelatedField(BaseField):
     is_related = True
 
     def __init__(self, db_name, to, related_db_name, *args, **kwargs):
+        """Constructor for related fields
+
+        :param db_name: The name of this field in the database
+        :type db_name: str
+        :param to: The name of the related Model
+        :type to: str
+        :param related_db_name: The name of the related field in the database
+        :type related_db_name: str
+        """
         self._to = to
         self._related_db_name = related_db_name
 
@@ -290,6 +300,13 @@ class StringField(Field):
     ]
 
     def __init__(self, db_name, max_width=None, *args, **kwargs):
+        """Construtor for StringField
+
+        :param db_name: The name of this field in the database
+        :type db_name: str
+        :param max_width: The max width for this field, defaults to None
+        :type max_width: int, optional
+        """
         self._max_width = max_width
 
         super(StringField, self).__init__(db_name, *args, **kwargs)
@@ -340,6 +357,13 @@ class BooleanField(Field):
     LOOKUPS = [LOOKUPS.EQUAL, LOOKUPS.NOT_EQUAL]
 
     def __init__(self, db_name, default=False, **kwargs):
+        """Constructor for BooleanField
+
+        :param db_name: The name of this field in the database
+        :type db_name: str
+        :param default: The default value, defaults to False
+        :type default: bool, optional
+        """
         super(BooleanField, self).__init__(db_name, default=default, **kwargs)
 
     def check_value(self, value):
@@ -374,6 +398,11 @@ class DateTimeField(Field):
     ]
 
     def __init__(self, db_name, *args, **kwargs):
+        """Constructor for DateTimeField
+
+        :param db_name: The name of this field in the database
+        :type db_name: str
+        """
         kwargs.pop("default", None)
         default = datetime.datetime.now()
         super(DateTimeField, self).__init__(
@@ -399,6 +428,11 @@ class DateField(Field):
     ]
 
     def __init__(self, db_name, *args, **kwargs):
+        """Constructor for DateField
+
+        :param db_name: The name of this field in the database
+        :type db_name: str
+        """
         kwargs.pop("default", None)
         default = datetime.date.today()
         super(DateField, self).__init__(
@@ -414,12 +448,15 @@ class DateField(Field):
 
 
 class OneToOneField(RelatedField):
+    """A Field which implements a One to One relation."""
     is_one_to_one = True
 
 
 class ManyToManyField(RelatedField):
+    """A Field which implements a Many to Many relation."""
     is_many_to_many = True
 
 
 class OneToManyField(RelatedField):
+    """A Field which implements a One to Many relation."""
     is_one_to_many = True

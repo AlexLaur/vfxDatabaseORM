@@ -31,14 +31,14 @@ from vfxDatabaseORM.core.models.options import Options
 from vfxDatabaseORM.core.models.attributes import AttributeDescriptor
 from vfxDatabaseORM.core.models.fields import Field, RelatedField, IntegerField
 from vfxDatabaseORM.core.serializers import JSONSerializer
-from vfxDatabaseORM.core.interfaces import IManager, ISerializer
+from vfxDatabaseORM.core.interfaces import IManager
 
 
 class BaseModel(type):
     """Metaclass for all models"""
 
     manager_class = IManager
-    serializer_class = ISerializer
+    serializer_class = JSONSerializer
     uid_key = constants.UID_KEY
 
     _graph = None  # Singleton Graph
@@ -173,7 +173,6 @@ class BaseModel(type):
 @six.add_metaclass(BaseModel)
 class Model(object):
     entity_name = ""
-    serializer_class = JSONSerializer
 
     # Default field to identify an entity in a database
     uid = IntegerField("id", read_only=True, default=0)
@@ -266,8 +265,8 @@ class Model(object):
 
     @classmethod
     def get_field(cls, field_name):
-        """Get the field object corresponding to the given field name. The
-        field name correspond to the attribute name of the Model.
+        """Get the field object corresponding to the given field name.
+        The field name correspond to the attribute name of the Model.
 
         For example, you have define a field in the model like this:
 
