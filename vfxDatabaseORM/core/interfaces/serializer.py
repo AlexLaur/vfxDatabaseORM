@@ -28,13 +28,25 @@ ABC = abc.ABCMeta("ABC", (object,), {})
 
 
 class ISerializer(ABC):
+    """Interface for serializers."""
+
     def __init__(self, model_class):
         self.model_class = model_class
 
     @abc.abstractmethod
-    def serialize(cls, model):
+    def serialize(self, model):
+        """Serialize the model.
+
+        :param model: The model to serializer
+        :type model: vfxDatabaseORM.core.models.Model
+        """
         pass
 
     @abc.abstractmethod
-    def deserialize(cls, data):
+    def deserialize(self, data):
+        """Deserialize the data and create a instance of the model.
+
+        :param data: The data which represents a model
+        :type data: dict
+        """
         pass

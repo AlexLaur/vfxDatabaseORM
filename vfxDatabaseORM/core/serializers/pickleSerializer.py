@@ -29,11 +29,25 @@ from vfxDatabaseORM.core.interfaces import ISerializer
 
 class PickleSerializer(ISerializer):
     def serialize(self, instance):
+        """Serialize the given instance in the pickle format
+
+        :param instance: The instance to serialize
+        :type instance: vfxDatabaseORM.core.models.Model
+        :return: The serialized model
+        :rtype: str
+        """
         data = {}
         for field in self.model_class.get_fields():
             data[field.name] = getattr(instance, field.name)
         return pickle.dumps(data)
 
     def deserialize(self, data):
+        """Deserialize the data and create a new Model instance
+
+        :param data: The data (in pickle format)
+        :type data: str
+        :return: A new instance
+        :rtype: vfxDatabaseORM.core.models.Model
+        """
         unpickled_data = pickle.loads(data)
         return self.model_class(**unpickled_data)

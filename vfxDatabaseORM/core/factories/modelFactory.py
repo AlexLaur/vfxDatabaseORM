@@ -24,8 +24,20 @@
 
 
 class ModelFactory(object):
+    """ModelFactory is a factory for models."""
+
     @staticmethod
     def build(model_class, raw_values):
+        """Create an instance of the given model class with the given values.
+
+        :param model_class: The Model to build
+        :type model_class: vfxDatabaseORM.core.models.Model
+        :param raw_values: Values for the model. It should be raw values
+        from the database.
+        :type raw_values: dict
+        :return: An instance of the Model
+        :rtype: vfxDatabaseORM.core.models.Model
+        """
         kwargs = {}
         fields = model_class.get_fields()
         for field in fields:

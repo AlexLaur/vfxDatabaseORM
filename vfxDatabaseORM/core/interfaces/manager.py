@@ -28,33 +28,55 @@ ABC = abc.ABCMeta("ABC", (object,), {})
 
 
 class IManager(ABC):
+    """Interface for all managers."""
+
     def __init__(self, model_class):
         self.model_class = model_class
 
     @abc.abstractmethod
     def get(self, uid):
+        """Get object in the database for the given uid.
+
+        :param uid: The id of the object in the database
+        :type uid: int
+        """
         pass
 
     @abc.abstractmethod
     def all(self):
+        """Get all objects in the database."""
         pass
 
     @abc.abstractmethod
     def filters(self, **kwargs):
+        """Filters objects in the database."""
         pass
 
     @abc.abstractmethod
     def create(self, **kwargs):
+        """Create the object in the database from the given arguments."""
         pass
 
     @abc.abstractmethod
     def insert(self, instance):
+        """Insert the object in the database. It is like the create() method
+        but it takes an instance instead of arguments.
+
+        :param instance: The instance to insert in the database.
+        :type instance: vfxDatabaseORM.core.models.Model
+        """
         pass
 
     @abc.abstractmethod
     def update(self, instance):
+        """Update the object in the database.
+
+        :param instance: The instance to update in the database.
+        :type instance: vfxDatabaseORM.core.models.Model
+        """
         pass
 
     @abc.abstractmethod
-    def delete(self):
+    def delete(self, instance):
+        """Delete the object from the database."""
         pass

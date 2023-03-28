@@ -230,5 +230,13 @@ class ShotgridManager(IManager):
 
         return new_instance
 
-    def delete(self):
-        raise NotImplementedError()
+    def delete(self, instance):
+        """Delete the entity on Shotgrid
+
+        :param instance: The instance to delete
+        :type instance: vfxDatabaseORM.core.models.Model
+        :return: True if done, False otherwise
+        :rtype: bool
+        """
+        self._SG_CLIENT.delete(self.model_class.entity_name, instance.uid)
+        return True

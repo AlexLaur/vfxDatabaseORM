@@ -63,5 +63,5 @@ class FTrackManager(IManager):
     def update(self, instance):
         raise NotImplementedError()
 
-    def delete(self):
+    def delete(self, instance):
         raise NotImplementedError()

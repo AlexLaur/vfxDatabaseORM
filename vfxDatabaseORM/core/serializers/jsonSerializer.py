@@ -27,10 +27,24 @@ from vfxDatabaseORM.core.interfaces import ISerializer
 
 class JSONSerializer(ISerializer):
     def serialize(self, instance):
+        """Serialize the given instance into a dict (in JSON format)
+
+        :param instance: The instance to serialize
+        :type instance: vfxDatabaseORM.core.models.Model
+        :return: The serialized model
+        :rtype: dict
+        """
         data = {}
         for field in self.model_class.get_fields():
             data[field.name] = getattr(instance, field.name)
         return data
 
     def deserialize(self, data):
+        """Deserialize the data and create a new Model instance
+
+        :param data: The data (in JSON format)
+        :type data: dict
+        :return: A new instance
+        :rtype: vfxDatabaseORM.core.models.Model
+        """
         return self.model_class(**data)
