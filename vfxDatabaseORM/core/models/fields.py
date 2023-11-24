@@ -451,12 +451,46 @@ class OneToOneField(RelatedField):
     """A Field which implements a One to One relation."""
     is_one_to_one = True
 
+    def check_value(self, value):
+        if value is None:
+            # Allow to unlink entities
+            return True
+        if value.entity_name != self.to:
+            # Should be the same type as defined in "to"
+            return False
+        return super(OneToOneField, self).check_value(value)
+
 
 class ManyToManyField(RelatedField):
     """A Field which implements a Many to Many relation."""
     is_many_to_many = True
 
+    def check_value(self, value):
+        if not isinstance(value, (list, tuple)):
+            return False
+        for i in value:
+            if i.entity_name != self.to:
+                # Should be the same type as defined in "to"
+                return False
+            if not i.uid:
+                # The element doesn't exists in the database, it should be created first
+                return False
+        return super(ManyToManyField, self).check_value(value)
+
 
 class OneToManyField(RelatedField):
     """A Field which implements a One to Many relation."""
     is_one_to_many = True
+
+    def check_value(self, value):
+        if not isinstance(value, (list, tuple)):
+            # Should be an iterable
+            return False
+        for i in value:
+            if i.entity_name != self.to:
+                # Should be the same type as defined in "to"
+                return False
+            if not i.uid:
+                # The element doesn't exists in the database, it should be created first
+                return False
+        return super(OneToManyField, self).check_value(value)

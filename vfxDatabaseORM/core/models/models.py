@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from dataclasses import field
 import six
 
 from vfxDatabaseORM.core import exceptions
@@ -122,6 +123,7 @@ class BaseModel(type):
             new_attrs[attr_name] = attr_descriptor
 
         new_attrs["_meta"] = options
+        new_attrs["_dirty"] = False
         new_attrs["_initialized"] = False
         new_attrs["_changed"] = []
         new_attrs["_graph"] = cls._graph
@@ -218,7 +220,7 @@ class Model(object):
             self._changed = []
             return True
 
-        if not self._changed:
+        if not self._dirty:
             # Nothing has changed, nothing to update
             return False
 
@@ -227,11 +229,21 @@ class Model(object):
 
         # Reset changed fields
         self._changed = []
+        self._dirty = False
 
         return True
 
     def delete(self):
         raise NotImplementedError()
+
+    @property
+    def is_dirty(self):
+        """Is the node is dirty ?
+
+        :return: Return True if the node is dirty, False otherwise
+        :rtype: bool
+        """
+        return self._dirty
 
     @classmethod
     def get_fields(cls):

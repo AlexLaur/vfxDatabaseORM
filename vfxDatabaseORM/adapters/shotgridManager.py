@@ -178,15 +178,33 @@ class ShotgridManager(IManager):
         :param instance: The instance to update
         :type instance: vfxDatabaseORM.core.models.Model
         """
+        uid_field = self.model_class.get_field(self.model_class.uid_key)
+
         new_data = {
             field.db_name: getattr(instance, field.name)
-            for field in instance._changed
+            for field in instance.get_fields() if field in instance._changed
         }
+
+        multi_entity_update_modes = {}
+        for field in instance.get_related_fields():
+            if field not in instance._changed:
+                continue
+            if field.is_many_to_many or field.is_one_to_many:
+                new_data[field.db_name] = [{"type": i.entity_name, uid_field.db_name: i.uid} for i in getattr(instance, field.name)]
+                multi_entity_update_modes[field.db_name] = "set"
+            else:
+                # o2o field
+                related_element = getattr(instance, field.name)
+                if not related_element:
+                    new_data[field.db_name] = None
+                else:
+                    new_data[field.db_name] = {"type": related_element.entity_name, uid_field.db_name: related_element.uid}
+
         if not new_data:
             return
 
         self._SG_CLIENT.update(
-            self.model_class.entity_name, instance.uid, new_data
+            self.model_class.entity_name, instance.uid, new_data, multi_entity_update_modes
         )
 
     def create(self, **kwargs):
@@ -222,10 +240,23 @@ class ShotgridManager(IManager):
 
         field_names = [f.db_name for f in self.model_class.get_fields()]
 
+        for field in self.model_class.get_related_fields():
+            value = getattr(instance, field.name)
+            if field.is_one_to_one:
+                if not new_data.get(field.db_name, None):
+                    if not value:
+                        new_data[field.db_name] = value
+                    else:
+                        new_data[field.db_name] = {"id": value.uid, "type": value.entity_name}
+            else:
+                if not value:
+                    new_data[field.db_name] = []
+                else:
+                    new_data[field.db_name] = [{"id": v.uid, "type": v.entity_name} for v in value]
+
         query_data = self._SG_CLIENT.create(
             self.model_class.entity_name, new_data, field_names
         )
-
         new_instance = ModelFactory.build(self.model_class, query_data)
 
         return new_instance
