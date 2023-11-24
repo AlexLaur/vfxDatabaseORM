@@ -49,6 +49,13 @@ class AttributeDescriptor(object):
             # It is not a related field, simply return the value.
             return getattr(instance, self._attribute_name)
 
+        # TODO maybe for o2m and m2m fields we can have an object with
+        # .clear(), .set(), .add(), .remove() methods ?
+
+        if instance.is_dirty and self._field.name in [x.name for x in instance._changed]:
+            return getattr(instance, self._attribute_name)
+
+        # It is a related field
         related_model = instance._graph.get_node_model(self._field.to)
         related_db_name = self._field.related_db_name
         related_model_fields = related_model.get_related_fields()
@@ -127,25 +134,34 @@ class AttributeDescriptor(object):
                 "It cannot be updated.".format(name=self._field.name)
             )
 
-        # TODO Cannot update related field for this moment
-        if self._field.is_related:
-            return
-
         # Check the value before storing it
         if not self._field.check_value(value):
             raise exceptions.FieldBadValue(
                 "The given value '{value}' is not valid "
-                "for this kind of field '{field}'.".format(
+                "for this kind of field '{field}'. If it's a related field, "
+                "related objects should exists on database before.".format(
                     value=value, field=self._field
                 )
             )
 
-        if getattr(instance, self._field.name) == value:
-            # It is the same value, no change to perform
-            return
+        # Related fields
+        if self._field.is_related:
+            # The field has been changed, mark it as changed.
+            if self._field not in instance._changed:
+                instance._changed.append(self._field)
 
-        # The field has been changed, mark it as changed.
-        if self._field not in instance._changed:
-            instance._changed.append(self._field)
+            instance._dirty = True
+            setattr(instance, self._attribute_name, value)
 
-        setattr(instance, self._attribute_name, value)
+        # No related field
+        else:
+            if getattr(instance, self._field.name) == value:
+                # It is the same value, no change to perform
+                return
+
+            # The field has been changed, mark it as changed.
+            if self._field not in instance._changed:
+                instance._changed.append(self._field)
+
+            instance._dirty = True
+            setattr(instance, self._attribute_name, value)
